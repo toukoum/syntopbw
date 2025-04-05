@@ -13,6 +13,7 @@ import { SYSTEM_PROMPT }  from "./prompt";
 
 import { loadDynamicTools } from "./util/toolManagers";
 import { addContact, getContact } from "./tools/contact";
+import { fetchTwitterDescription } from "./tools/fetchTwitterDescription";
 
 export const maxDuration = 30;
 
