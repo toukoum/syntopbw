@@ -62,6 +62,7 @@ export const TOOL_REGISTRY: Record<string, ToolCategory> = {
   'convert': ToolCategory.WALLET,
   
   // Utility tools
+  'checkPortfolio':ToolCategory.UTILITY,
   'getweather': ToolCategory.UTILITY,
   'getlocation': ToolCategory.UTILITY,
   

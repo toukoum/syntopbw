@@ -14,6 +14,7 @@ import { SYSTEM_PROMPT }  from "./prompt";
 import { loadDynamicTools } from "./util/toolManagers";
 import { addContact, getContact } from "./tools/contact";
 import { fetchTwitterDescription } from "./tools/fetchTwitterDescription";
+import { checkPortfolio } from "./tools/checkPortfolio";
 
 export const maxDuration = 30;
 
@@ -38,6 +39,7 @@ export async function POST(req: Request) {
 			//convert,
 			send,
 			swap,
+			checkPortfolio,
 			getLocation,
 			getWeather,
       addContact,

@@ -101,7 +101,7 @@ export default function WalletConfirmation({
               throw new Error("Invalid output token");
           }
 
-          const decimals = await QueryMintDecimals(connection,inputAddress);
+          const decimals = await QueryMintDecimals(connection, inputAddress);
 
           const instruction = await BuildSwapInstruction(
             inputAddress,

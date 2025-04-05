@@ -1,6 +1,7 @@
+import { FetchBalances } from "@/utils/crypto";
 import { isWalletTool } from "./types";
+import { PublicKey } from "@solana/web3.js";
 // List of wallet tools that should be handled by UI
-const WALLET_TOOLS = ['send', 'swap', 'bridge', 'stake', 'convert', 'fetchTwitterDescription'];
 
 /**
  * Execute a tool call from the AI
@@ -14,11 +15,13 @@ export const executeToolCall = async (
 ): Promise<string | null> => {
   const toolName = tool.toolCall.toolName;
   const args = tool.toolCall.args;
-  console.log('Tool call:', toolName, args);
+  console.log("Tool call:", toolName, args);
 
   // Return null for wallet tools to be handled by UI
   if (isWalletTool(toolName)) {
-    console.log(`Tool ${toolName} is a wallet tool, returning null for UI handling.`);
+    console.log(
+      `Tool ${toolName} is a wallet tool, returning null for UI handling.`
+    );
     return null;
   }
 
@@ -26,31 +29,36 @@ export const executeToolCall = async (
     console.log(`Executing non-wallet tool: ${toolName}`);
 
     // Check wallet connection for contact-related tools
-    if (['addcontact', 'getcontact'].includes(toolName.toLowerCase()) && !userWalletAddress) {
+    if (
+      ["addcontact", "getcontact"].includes(toolName.toLowerCase()) &&
+      !userWalletAddress
+    ) {
       throw new Error("Wallet connection required to manage contacts");
     }
 
     // Execute different tools based on name
     switch (toolName.toLowerCase()) {
-      case 'getweather':
+      case "checkportfolio":
+        return handleBalancesTool(args, userWalletAddress);
+      case "getweather":
         return handleWeatherTool(args);
-      
-      case 'getlocation':
+
+      case "getlocation":
         return handleLocationTool();
-      
-      case 'addcontact':
+
+      case "addcontact":
         return handleAddContactTool(args, userWalletAddress);
-      
-      case 'getcontact':
+
+      case "getcontact":
         return handleGetContactTool(args, userWalletAddress);
-      
-      case 'visualizedata':
-      case 'generatechart':
+
+      case "visualizedata":
+      case "generatechart":
         return handleVisualizationTool(args);
 
-      case 'fetchtwitterdescription':
+      case "fetchtwitterdescription":
         return handleFetchTwitterDescriptionTool(args);
-      
+
       default:
         return handleGenericTool(toolName);
     }
@@ -58,65 +66,79 @@ export const executeToolCall = async (
     console.error(`Error executing tool ${toolName}:`, error);
     return JSON.stringify({
       success: false,
-      error: error.message || 'Tool execution failed'
+      error: error.message || "Tool execution failed",
     });
   }
 };
 
 // Individual tool handlers
 const handleWeatherTool = async (args: any): Promise<string> => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   return JSON.stringify({
     success: true,
     data: {
       location: args.city,
       temperature: Math.floor(Math.random() * 30) + 5,
-      condition: ['Sunny', 'Cloudy', 'Rainy', 'Snowy'][Math.floor(Math.random() * 4)],
+      condition: ["Sunny", "Cloudy", "Rainy", "Snowy"][
+        Math.floor(Math.random() * 4)
+      ],
       humidity: Math.floor(Math.random() * 100),
       wind: Math.floor(Math.random() * 30),
     },
-    message: `Weather information for ${args.city}`
+    message: `Weather information for ${args.city}`,
   });
 };
 
 const handleLocationTool = async (): Promise<string> => {
-  await new Promise(resolve => setTimeout(resolve, 800));
+  await new Promise((resolve) => setTimeout(resolve, 800));
   return JSON.stringify({
     success: true,
     data: {
-      city: ['New York', 'London', 'Tokyo', 'Paris'][Math.floor(Math.random() * 4)],
-      country: ['USA', 'UK', 'Japan', 'France'][Math.floor(Math.random() * 4)],
+      city: ["New York", "London", "Tokyo", "Paris"][
+        Math.floor(Math.random() * 4)
+      ],
+      country: ["USA", "UK", "Japan", "France"][Math.floor(Math.random() * 4)],
     },
-    message: 'Location determined successfully'
+    message: "Location determined successfully",
   });
 };
 
-const handleAddContactTool = async (args: any, userWalletAddress?: string): Promise<string> => {
+const handleAddContactTool = async (
+  args: any,
+  userWalletAddress?: string
+): Promise<string> => {
   console.log(`Executing addContact tool for: ${args.name}`);
-  const addContactResponse = await fetch('/api/contacts/add', {
-    method: 'POST',
+  const addContactResponse = await fetch("/api/contacts/add", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       userWalletAddress,
       contactName: args.name,
-      contactWalletAddress: args.address
+      contactWalletAddress: args.address,
     }),
   });
 
   const addContactData = await addContactResponse.json();
 
   if (!addContactResponse.ok) {
-    throw new Error(addContactData.error || 'Failed to add contact');
+    throw new Error(addContactData.error || "Failed to add contact");
   }
 
   return JSON.stringify(addContactData);
 };
 
-const handleGetContactTool = async (args: any, userWalletAddress?: string): Promise<string> => {
+const handleGetContactTool = async (
+  args: any,
+  userWalletAddress?: string
+): Promise<string> => {
   console.log(`Executing getContact tool for: ${args.name}`);
-  const getContactResponse = await fetch(`/api/contacts/get?userWalletAddress=${encodeURIComponent(userWalletAddress || '')}&contactName=${encodeURIComponent(args.name)}`);
+  const getContactResponse = await fetch(
+    `/api/contacts/get?userWalletAddress=${encodeURIComponent(
+      userWalletAddress || ""
+    )}&contactName=${encodeURIComponent(args.name)}`
+  );
 
   const getContactData = await getContactResponse.json();
 
@@ -127,41 +149,42 @@ const handleGetContactTool = async (args: any, userWalletAddress?: string): Prom
         success: false,
         data: null,
         error: `Contact '${args.name}' not found`,
-        message: `No contact found with name ${args.name}`
+        message: `No contact found with name ${args.name}`,
       });
     }
 
-    throw new Error(getContactData.error || 'Failed to get contact');
+    throw new Error(getContactData.error || "Failed to get contact");
   }
 
   return JSON.stringify(getContactData);
 };
 
 const handleVisualizationTool = async (args: any): Promise<string> => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   return JSON.stringify({
     success: true,
     data: {
-      chartType: args.type || 'bar',
+      chartType: args.type || "bar",
       dataPoints: 8,
-      url: 'https://example.com/chart',
+      url: "https://example.com/chart",
     },
-    message: 'Chart generated successfully'
+    message: "Chart generated successfully",
   });
 };
 
 const handleGenericTool = async (toolName: string): Promise<string> => {
   console.log(`Executing generic tool: ${toolName}`);
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise((resolve) => setTimeout(resolve, 500));
   return JSON.stringify({
     success: true,
     data: { executed: true, timestamp: new Date().toISOString() },
-    message: `Tool ${toolName} executed successfully`
+    message: `Tool ${toolName} executed successfully`,
   });
 };
 
-
-const handleFetchTwitterDescriptionTool = async (args: any): Promise<string> => {
+const handleFetchTwitterDescriptionTool = async (
+  args: any
+): Promise<string> => {
   console.log(`Executing fetchTwitterDescription tool for: ${args.username}`);
   return JSON.stringify({
     success: true,
@@ -176,13 +199,34 @@ const handleFetchTwitterDescriptionTool = async (args: any): Promise<string> => 
       • 50% SOL
       • 50% wBTC
 
-      
+      20% Stablecoins
+
       Still waiting for either a BTC retest of 68-70k or a Fed pivot
-      
+
       No leverage. Vibecoding, reading, sports.
-      
+
       Love you all 🧡`,
-      executed: true, timestamp: new Date().toISOString() },
-      message: `Twitter description fetched successfully for ${args.username}`
+      executed: true,
+      timestamp: new Date().toISOString(),
+    },
+    message: `Twitter description fetched successfully for ${args.username}`,
+  });
+};
+
+const handleBalancesTool = async (
+  args: any,
+  userWalletAddress?: string
+): Promise<string> => {
+  console.log(`Executing checkPortfolio tool for: ${userWalletAddress}`);
+  if (!userWalletAddress)
+    return JSON.stringify({
+      success: false,
+      error: "Wallet address is required to check portfolio",
+    });
+  const balances = await FetchBalances(new PublicKey(userWalletAddress));
+  return JSON.stringify({
+    success: true,
+    data: { balances },
+    message: `Balances fetched successfully for ${args.address}`,
   });
 };
