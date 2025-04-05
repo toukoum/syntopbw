@@ -6,8 +6,9 @@
 //import { Connection } from "@solana/web3.js";
 //import { Wallet } from "@solana/wallet-adapter-react";
 //import { NFTAsset } from "@/types/nft";
-import { getMint } from "@solana/spl-token";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { SOL, tokenAddresses } from "@/components/constantes/tokenAddresses";
+import { getAccount, getMint } from "@solana/spl-token";
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 
 //// Type for the MintPay program
 //interface MintPay {
@@ -128,7 +129,31 @@ export async function QueryMintDecimals(
   mintAddress: string
 ): Promise<number> {
   connection = new Connection(process.env.NEXT_PUBLIC_RPC ?? "");
-  console.log({ mintAddress });
   const { decimals } = await getMint(connection, new PublicKey(mintAddress));
   return decimals;
+}
+
+export async function FetchBalances(
+  userAddress: PublicKey
+): Promise<{ [key: string]: number }> {
+  const connection = new Connection(process.env.NEXT_PUBLIC_RPC ?? "");
+  console.log("user address", userAddress);
+  const accounts = await connection.getTokenAccountsByOwner(userAddress, {
+    programId: new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+  });
+
+  const balanceMap: { [key: string]: number } = {};
+
+  for (const balance of accounts.value) {
+    const bal = await connection.getTokenAccountBalance(balance.pubkey);
+    console.log("bal", bal);
+    console.log("balance", balance.pubkey.toString());
+    const { mint } = await getAccount(connection, balance.pubkey);
+    console.log("mint", mint.toString());
+    balanceMap[tokenAddresses.get(mint.toString()) ?? ""] =
+      +bal.value.amount / 10 ** bal.value.decimals;
+  }
+  const solBalance = await connection.getBalance(userAddress);
+  balanceMap[SOL] = solBalance / LAMPORTS_PER_SOL; // Convert to SOL
+  return balanceMap;
 }
