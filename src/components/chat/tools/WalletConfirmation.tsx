@@ -15,7 +15,7 @@ import { useState } from "react";
 import ToolProcessingCard from "./ToolProcessingCard";
 import ToolResultCard from "./ToolResultCard";
 import { TransactionState } from "./types";
-import { BuildSwapInstruction } from "@/utils/crypto";
+import { BuildSwapInstruction, QueryMintDecimals } from "@/utils/crypto";
 import { SOL, USDC, wBTC, wETH } from "@/components/constantes/tokenAddresses";
 
 interface WalletConfirmationProps {
@@ -58,6 +58,7 @@ export default function WalletConfirmation({
               lamports: args.amount * 1e9, // Convert SOL to lamports
             })
           );
+
           signature = await sendTransaction(transaction, connection);
           break;
 
@@ -100,14 +101,20 @@ export default function WalletConfirmation({
               throw new Error("Invalid output token");
           }
 
+          const decimals = await QueryMintDecimals(connection,inputAddress);
+
           const instruction = await BuildSwapInstruction(
             inputAddress,
             outputAddress,
-            amount
+            amount * 10 ** decimals,
+            publicKey.toString()
           );
+
+          console.log("Swap instruction:", instruction);
           const versInstruction = VersionedTransaction.deserialize(
             Buffer.from(instruction, "base64")
           );
+
           signature = await sendTransaction(versInstruction, connection);
           break;
 

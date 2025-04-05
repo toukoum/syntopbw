@@ -51,7 +51,7 @@ export default function ToolResultCard({
 
   // Explorer URL for blockchain transactions
   const explorerUrl = transactionHash && toolCategory === ToolCategory.WALLET
-    ? `https://solscan.io/tx/${transactionHash}?cluster=devnet`
+    ? `https://solscan.io/tx/${transactionHash}`
     : null;
 
   // Generate title based on tool category and success state

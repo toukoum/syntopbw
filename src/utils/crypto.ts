@@ -6,8 +6,8 @@
 //import { Connection } from "@solana/web3.js";
 //import { Wallet } from "@solana/wallet-adapter-react";
 //import { NFTAsset } from "@/types/nft";
-
-import { PublicKey } from "@solana/web3.js";
+import { getMint, MintLayout } from "@solana/spl-token";
+import { Connection, PublicKey } from "@solana/web3.js";
 
 //// Type for the MintPay program
 //interface MintPay {
@@ -107,41 +107,30 @@ import { PublicKey } from "@solana/web3.js";
 export async function BuildSwapInstruction(
   input: string,
   output: string,
-  amount: number
+  amount: number,
+  userAddress: string
 ): Promise<string> {
+  console.log({ amount });
   const quoteResponse = await (
     await fetch(
-      `https://api.jup.ag/swap/v1/quote?inputMint=${input}&outputMint=${output}&amount=${amount}&slippageBps=50&restrictIntermediateTokens=true`
+      `https://ultra-api.jup.ag/order?inputMint=${input}&outputMint=${output}&amount=${amount}&taker=${userAddress}`
+      // `https://api.jup.ag/swap/v1/quote?inputMint=${input}&outputMint=${output}&amount=${
+      //   amount * LAMPORTS_PER_SOL
+      // }&slippageBps=50&restrictIntermediateTokens=true`
     )
   ).json();
 
-  //   console.log(JSON.stringify(quoteResponse, null, 2));
+  return quoteResponse.transaction;
+}
 
-  const swapResponse = await (
-    await fetch("https://api.jup.ag/swap/v1/swap", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // 'x-api-key': '' // enter api key here
-      },
-      body: JSON.stringify({
-        quoteResponse,
-        userPublicKey: "Z9ckPtZS6RtBLJVnMfDzj71mJvFupunAjirNF6H9wgJ",
-
-        // ADDITIONAL PARAMETERS TO OPTIMIZE FOR TRANSACTION LANDING
-        // See next guide to optimize for transaction landing
-        dynamicComputeUnitLimit: true,
-        dynamicSlippage: true,
-        prioritizationFeeLamports: {
-          priorityLevelWithMaxLamports: {
-            maxLamports: 1000000,
-            priorityLevel: "veryHigh",
-          },
-        },
-      }),
-    })
-  ).json();
-
-  console.log(swapResponse);
-  return swapResponse.swapTransaction;
+export async function QueryMintDecimals(
+  connection: Connection,
+  mintAddress: string
+): Promise<number> {
+  connection = new Connection(
+    "https://stylish-blue-butterfly.solana-mainnet.quiknode.pro/a9f23e5699089b9232dca4ef43b088bc1e1ad0d4/"
+  );
+  console.log({ mintAddress });
+  const { decimals } = await getMint(connection, new PublicKey(mintAddress));
+  return decimals;
 }
