@@ -34,9 +34,9 @@ import { Connection, PublicKey } from "@solana/web3.js";
 //    const provider = new AnchorProvider(connection, wallet, {
 //      commitment: "confirmed",
 //    });
-    
+
 //    const program = new Program(idlMintPay as MintPay, provider);
-    
+
 //    const [collectionAccount] = PublicKey.findProgramAddressSync(
 //      [Buffer.from("collection")],
 //      program.programId
@@ -44,9 +44,9 @@ import { Connection, PublicKey } from "@solana/web3.js";
 
 //    const collectionData = await program.account.collection.fetch(collectionAccount);
 //    const collectionAddress = collectionData.collectionAddress;
-    
+
 //    const collection = await fetchAssetsByCollection(
-//      createUmi(connection), 
+//      createUmi(connection),
 //      collectionAddress
 //    );
 
@@ -127,7 +127,7 @@ export async function QueryMintDecimals(
   connection: Connection,
   mintAddress: string
 ): Promise<number> {
-  connection = new Connection(process.env.RPC ?? "");
+  connection = new Connection(process.env.NEXT_PUBLIC_RPC ?? "");
   console.log({ mintAddress });
   const { decimals } = await getMint(connection, new PublicKey(mintAddress));
   return decimals;
