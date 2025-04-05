@@ -1,6 +1,7 @@
 import { FetchBalances } from "@/utils/crypto";
 import { isWalletTool } from "./types";
 import { PublicKey } from "@solana/web3.js";
+import { addressesToken } from "@/components/constantes/tokenAddresses";
 // List of wallet tools that should be handled by UI
 
 /**
@@ -40,6 +41,8 @@ export const executeToolCall = async (
     switch (toolName.toLowerCase()) {
       case "checkportfolio":
         return handleBalancesTool(args, userWalletAddress);
+      case "checkbalance":
+        return handleBalanceTool(args, userWalletAddress);
       case "getweather":
         return handleWeatherTool(args);
 
@@ -188,7 +191,7 @@ const handleFetchTwitterDescriptionTool = async (
   console.log(`Executing fetchTwitterDescription tool for: ${args.username}`);
   return JSON.stringify({
     success: true,
-    data: { 
+    data: {
       content: `Week 6 – Quick Update
       
       Overall: -35% (BTC Benchmark: -13.3%)
@@ -228,5 +231,24 @@ const handleBalancesTool = async (
     success: true,
     data: { balances },
     message: `Balances fetched successfully for ${args.address}`,
+  });
+};
+
+const handleBalanceTool = async (
+  args: any,
+  userWalletAddress?: string
+): Promise<string> => {
+  console.log(`Executing checkPortfolio tool for: ${userWalletAddress}`);
+  if (!userWalletAddress)
+    return JSON.stringify({
+      success: false,
+      error: "Wallet address is required to check portfolio",
+    });
+  const balances = await FetchBalances(new PublicKey(userWalletAddress));
+  console.log("Balances", balances[addressesToken.get(args.address) ?? ""]);
+  return JSON.stringify({
+    success: true,
+    data: { balance: balances[addressesToken.get(args.address) ?? ""] },
+    message: `Balance fetched successfully for ${args.address}`,
   });
 };

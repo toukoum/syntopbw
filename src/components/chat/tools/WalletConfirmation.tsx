@@ -16,7 +16,13 @@ import ToolProcessingCard from "./ToolProcessingCard";
 import ToolResultCard from "./ToolResultCard";
 import { TransactionState } from "./types";
 import { BuildSwapInstruction, QueryMintDecimals } from "@/utils/crypto";
-import { SOL, USDC, wBTC, wETH } from "@/components/constantes/tokenAddresses";
+import {
+  SOL,
+  USDC,
+  wBTC,
+  wETH,
+  META,
+} from "@/components/constantes/tokenAddresses";
 
 interface WalletConfirmationProps {
   toolCallId: string;
@@ -80,6 +86,9 @@ export default function WalletConfirmation({
             case "ETH":
               inputAddress = wETH;
               break;
+            case "META":
+              inputAddress = META;
+              break;
             default:
               throw new Error("Invalid input token");
           }
@@ -96,6 +105,9 @@ export default function WalletConfirmation({
               break;
             case "ETH":
               outputAddress = wETH;
+              break;
+            case "META":
+              outputAddress = META;
               break;
             default:
               throw new Error("Invalid output token");

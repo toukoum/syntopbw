@@ -10,3 +10,11 @@ export const tokenAddresses: Map<string, string> = new Map([
   [SOL, "SOL"],
   [wETH, "wETH"],
 ]);
+
+export const addressesToken: Map<string, string> = new Map([
+  ["USDC", USDC],
+  ["BTC", wBTC],
+  ["SOL", SOL],
+  ["ETH", wETH],
+  ["META", META],
+]);
