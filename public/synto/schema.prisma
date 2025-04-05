@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  walletAddress String    @unique
+  name          String?
+  avatar        String?
+  contacts      Contact[]
+  createdTools  Tool[]    @relation("Creator")
+}
+
+model Contact {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  name          String
+  walletAddress String
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, name])
+}
+
+model Tool {
+  id            String      @id @default(uuid())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  image         String?
+  name          String
+  description   String
+  category      String
+  parameters    Parameter[] // Relation one-to-many
+  attributes    Attribute[] // Relation one-to-many
+  published     Boolean     @default(false)
+  creator       User        @relation("Creator", fields: [creatorId], references: [id])
+  creatorId     String
+  enabled       Boolean     @default(true)
+}
+
+model Parameter {
+  id          String   @id @default(uuid())
+  name        String
+  type        String
+  description String
+  required    Boolean
+  tool        Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  toolId      String
+}
+
+model Attribute {
+  id          String   @id @default(uuid())
+  traitType   String   // Renommé de "key" à "traitType" selon votre interface
+  value       String
+  tool        Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  toolId      String
+}
