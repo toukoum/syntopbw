@@ -42,6 +42,7 @@ export async function POST(req: Request) {
 			getWeather,
       addContact,
       getContact,
+	  fetchTwitterDescription,
 		};
 
 		// Load dynamic tools from localStorage
