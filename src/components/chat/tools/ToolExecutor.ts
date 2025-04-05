@@ -165,25 +165,24 @@ const handleFetchTwitterDescriptionTool = async (args: any): Promise<string> => 
   console.log(`Executing fetchTwitterDescription tool for: ${args.username}`);
   return JSON.stringify({
     success: true,
-    data: { content: `Week 6 – Quick Update
+    data: { 
+      content: `Week 6 – Quick Update
+      
+      Overall: -35% (BTC Benchmark: -13.3%)
+      
+      New Allocation:
 
-Overall: -35% (BTC Benchmark: -13.3%)
-
-New Allocation:
-
-40% wBTC
-
-30% JITOSOL
-
-10% META
-
-20% Stablecoins
-
-Still waiting for either a BTC retest of 68-70k or a Fed pivot
-
-No leverage. Vibecoding, reading, sports.
-
-Love you all 🧡`, executed: true, timestamp: new Date().toISOString() },
-    message: `Twitter description fetched successfully for ${args.username}`
+      • 15% META
+      • 30% wBTC
+      • 40% JITOSOL
+      • 15% Stablecoins
+      
+      Still waiting for either a BTC retest of 68-70k or a Fed pivot
+      
+      No leverage. Vibecoding, reading, sports.
+      
+      Love you all 🧡`,
+      executed: true, timestamp: new Date().toISOString() },
+      message: `Twitter description fetched successfully for ${args.username}`
   });
 };
