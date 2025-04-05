@@ -8,12 +8,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageSquare, Sparkles } from "lucide-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function ConversationPage({ params }: { params: { id: string } }) {
   const { publicKey } = useWallet();
   const id = params.id;
-  const router = useRouter();
   
   const getChatById = useChatStore((state) => state.getChatById);
   const saveMessages = useChatStore((state) => state.saveMessages);

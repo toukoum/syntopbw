@@ -6,7 +6,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Menu,
   MessageSquare,
   Moon,
   MoreHorizontal,
