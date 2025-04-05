@@ -1,6 +1,0 @@
-[submodule "mintPay"]
-	path = mintPay
-	url = git@github.com:Juiiceee/mintPay.git
-[submodule "swapSynto"]
-	path = swapSynto
-	url = git@github.com:Juiiceee/swapSynto.git
