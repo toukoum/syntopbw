@@ -9,21 +9,25 @@ import { MessageSquare, Sparkles } from "lucide-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
 
-export default function ConversationPage({ params }: { params: { id: string } }) {
+export default function ConversationPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const { publicKey } = useWallet();
   const id = params.id;
   
   const getChatById = useChatStore((state) => state.getChatById);
   const saveMessages = useChatStore((state) => state.saveMessages);
   const setCurrentChatId = useChatStore((state) => state.setCurrentChatId);
-  
+
   // Vérifier si la conversation existe, sinon la créer
   const chat = getChatById(id);
 
   // Définir l'ID de chat actuel et créer un chat vide si nécessaire
   useEffect(() => {
     setCurrentChatId(id);
-    
+
     // Si le chat n'existe pas encore, créer une entrée vide
     if (!chat) {
       saveMessages(id, []);
@@ -64,16 +68,17 @@ export default function ConversationPage({ params }: { params: { id: string } })
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        <WalletMultiButton />
+        <WalletMultiButton
+          style={{
+            backgroundColor: "#007AFF",
+            borderRadius: "2rem",
+          }}
+        />
       </div>
 
       {/* Chat Content */}
       <div className="flex-1 overflow-hidden h-[calc(100vh-110px)]">
-        <ChatLayout
-          key={id}
-          id={id}
-          initialMessages={chat?.messages || []}
-        />
+        <ChatLayout key={id} id={id} initialMessages={chat?.messages || []} />
       </div>
     </div>
   );

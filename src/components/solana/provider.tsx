@@ -16,10 +16,10 @@ export const Wallet: FC<WalletProps> = ({ children }) => {
 	const [mounted, setMounted] = useState(false);
 
 	// The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
-	const network = WalletAdapterNetwork.Devnet;
+	const network = WalletAdapterNetwork.Mainnet;
 
 	// You can also provide a custom RPC endpoint.
-	const endpoint = useMemo(() => "https://api.devnet.solana.com", []);
+	const endpoint = useMemo(() => "https://api.mainnet-beta.solana.com", []);
 	const wallets = useMemo(
 		() => [
 		],

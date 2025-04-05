@@ -6,6 +6,8 @@
 //import { Connection } from "@solana/web3.js";
 //import { Wallet } from "@solana/wallet-adapter-react";
 //import { NFTAsset } from "@/types/nft";
+import { getMint, MintLayout } from "@solana/spl-token";
+import { Connection, PublicKey } from "@solana/web3.js";
 
 //// Type for the MintPay program
 //interface MintPay {
@@ -32,9 +34,9 @@
 //    const provider = new AnchorProvider(connection, wallet, {
 //      commitment: "confirmed",
 //    });
-    
+
 //    const program = new Program(idlMintPay as MintPay, provider);
-    
+
 //    const [collectionAccount] = PublicKey.findProgramAddressSync(
 //      [Buffer.from("collection")],
 //      program.programId
@@ -42,9 +44,9 @@
 
 //    const collectionData = await program.account.collection.fetch(collectionAccount);
 //    const collectionAddress = collectionData.collectionAddress;
-    
+
 //    const collection = await fetchAssetsByCollection(
-//      createUmi(connection), 
+//      createUmi(connection),
 //      collectionAddress
 //    );
 
@@ -101,3 +103,34 @@
 //    return [];
 //  }
 //}
+
+export async function BuildSwapInstruction(
+  input: string,
+  output: string,
+  amount: number,
+  userAddress: string
+): Promise<string> {
+  console.log({ amount });
+  const quoteResponse = await (
+    await fetch(
+      `https://ultra-api.jup.ag/order?inputMint=${input}&outputMint=${output}&amount=${amount}&taker=${userAddress}`
+      // `https://api.jup.ag/swap/v1/quote?inputMint=${input}&outputMint=${output}&amount=${
+      //   amount * LAMPORTS_PER_SOL
+      // }&slippageBps=50&restrictIntermediateTokens=true`
+    )
+  ).json();
+
+  return quoteResponse.transaction;
+}
+
+export async function QueryMintDecimals(
+  connection: Connection,
+  mintAddress: string
+): Promise<number> {
+  connection = new Connection(
+    "https://stylish-blue-butterfly.solana-mainnet.quiknode.pro/a9f23e5699089b9232dca4ef43b088bc1e1ad0d4/"
+  );
+  console.log({ mintAddress });
+  const { decimals } = await getMint(connection, new PublicKey(mintAddress));
+  return decimals;
+}

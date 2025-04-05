@@ -37,7 +37,7 @@ export default function CardList() {
       description: "Check your wallet balance"
     },
     {
-      text: "Swap 0.01 SOL for USDC",
+      text: "Swap 0.001 SOL for USDC",
       icon: <RefreshCw className="h-5 w-5" />,
       category: "swap",
       description: "Exchange tokens on Solana"

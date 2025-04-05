@@ -1,15 +1,22 @@
 // src/components/chat/tools/WalletConfirmation.tsx
-import ICON from '@/components/icons/rook.json';
+import ICON from "@/components/icons/rook.json";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Player } from '@lordicon/react';
+import { Player } from "@lordicon/react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import { Shield } from 'lucide-react';
-import { useState } from 'react';
-import ToolProcessingCard from './ToolProcessingCard';
-import ToolResultCard from './ToolResultCard';
-import { TransactionState } from './types';
+import {
+  PublicKey,
+  SystemProgram,
+  Transaction,
+  VersionedTransaction,
+} from "@solana/web3.js";
+import { Shield } from "lucide-react";
+import { useState } from "react";
+import ToolProcessingCard from "./ToolProcessingCard";
+import ToolResultCard from "./ToolResultCard";
+import { TransactionState } from "./types";
+import { BuildSwapInstruction, QueryMintDecimals } from "@/utils/crypto";
+import { SOL, USDC, wBTC, wETH } from "@/components/constantes/tokenAddresses";
 
 interface WalletConfirmationProps {
   toolCallId: string;
@@ -22,9 +29,11 @@ export default function WalletConfirmation({
   toolCallId,
   toolName,
   args,
-  addToolResult
+  addToolResult,
 }: WalletConfirmationProps) {
-  const [txState, setTxState] = useState<TransactionState>(TransactionState.WAITING_CONFIRMATION);
+  const [txState, setTxState] = useState<TransactionState>(
+    TransactionState.WAITING_CONFIRMATION
+  );
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
   const { connection } = useConnection();
@@ -40,7 +49,7 @@ export default function WalletConfirmation({
       let signature: string;
 
       switch (toolName.toLowerCase()) {
-        case 'send':
+        case "send":
           // Handle send transaction
           const transaction = new Transaction().add(
             SystemProgram.transfer({
@@ -49,12 +58,64 @@ export default function WalletConfirmation({
               lamports: args.amount * 1e9, // Convert SOL to lamports
             })
           );
+
           signature = await sendTransaction(transaction, connection);
           break;
 
-        case 'swap':
+        case "swap":
           // This would be implemented for swap functionality
-          signature = "sim_swap_" + Date.now().toString(16);
+          const { input, output, amount } = args;
+          let inputAddress: string;
+          let outputAddress: string;
+          switch (input) {
+            case "SOL":
+              inputAddress = SOL;
+              break;
+            case "BTC":
+              inputAddress = wBTC;
+              break;
+            case "USD":
+              inputAddress = USDC;
+              break;
+            case "ETH":
+              inputAddress = wETH;
+              break;
+            default:
+              throw new Error("Invalid input token");
+          }
+
+          switch (output) {
+            case "SOL":
+              outputAddress = SOL;
+              break;
+            case "BTC":
+              outputAddress = wBTC;
+              break;
+            case "USD":
+              outputAddress = USDC;
+              break;
+            case "ETH":
+              outputAddress = wETH;
+              break;
+            default:
+              throw new Error("Invalid output token");
+          }
+
+          const decimals = await QueryMintDecimals(connection,inputAddress);
+
+          const instruction = await BuildSwapInstruction(
+            inputAddress,
+            outputAddress,
+            amount * 10 ** decimals,
+            publicKey.toString()
+          );
+
+          console.log("Swap instruction:", instruction);
+          const versInstruction = VersionedTransaction.deserialize(
+            Buffer.from(instruction, "base64")
+          );
+
+          signature = await sendTransaction(versInstruction, connection);
           break;
 
         default:
@@ -71,20 +132,20 @@ export default function WalletConfirmation({
         const result = JSON.stringify({
           success: true,
           txHash: signature,
-          ...args
+          ...args,
         });
         addToolResult({ toolCallId, result });
       }
     } catch (err: any) {
-      console.error('Transaction error:', err);
+      console.error("Transaction error:", err);
       setTxState(TransactionState.FAILED);
-      setError(err.message || 'Transaction failed');
+      setError(err.message || "Transaction failed");
 
       // Return the error to the AI
       if (addToolResult) {
         const result = JSON.stringify({
           success: false,
-          error: err.message || 'Transaction failed'
+          error: err.message || "Transaction failed",
         });
         addToolResult({ toolCallId, result });
       }
@@ -94,13 +155,13 @@ export default function WalletConfirmation({
   // User rejected the transaction
   const handleReject = () => {
     setTxState(TransactionState.FAILED);
-    setError('Transaction rejected by user');
+    setError("Transaction rejected by user");
 
     // Return the rejection to the AI
     if (addToolResult) {
       const result = JSON.stringify({
         success: false,
-        error: 'Transaction rejected by user'
+        error: "Transaction rejected by user",
       });
       addToolResult({ toolCallId, result });
     }
@@ -125,14 +186,16 @@ export default function WalletConfirmation({
         toolName={toolName}
         result={JSON.stringify({ error })}
         success={false}
-        error={error || 'Transaction failed'}
+        error={error || "Transaction failed"}
         action={toolName}
       />
     );
   }
 
   if (txState === TransactionState.PENDING) {
-    return <ToolProcessingCard toolName={toolName} state={txState} isWallet={true} />;
+    return (
+      <ToolProcessingCard toolName={toolName} state={txState} isWallet={true} />
+    );
   }
 
   // Confirmation UI (WAITING_CONFIRMATION state)
@@ -154,10 +217,7 @@ export default function WalletConfirmation({
         </div>
 
         <div className="flex items-center gap-2 text-sm">
-          <Player
-            icon={ICON}
-            size={16}
-          />
+          <Player icon={ICON} size={16} />
           <p>Please confirm this transaction in your wallet</p>
         </div>
       </CardContent>
