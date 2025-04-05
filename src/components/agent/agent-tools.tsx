@@ -10,8 +10,6 @@ import { ToolCard } from "./tool-card";
 import { ToolCardChain } from "./tool-card-chain";
 import { fetchUserTools, fetchCreatedTools, fetchDefaultTools } from "@/app/actions/tools";
 import { useAnchorWallet, useConnection, useWallet } from "@solana/wallet-adapter-react";
-import idlMintPay from "@/../mintPay/target/idl/mint_pay.json";
-import { fetchNFTTools } from "@/utils/crypto";
 import { NFTAsset } from "@/types/nft";
 
 export interface Tool {
@@ -57,16 +55,6 @@ export default function AgentTools({ walletAddress }: { walletAddress: string })
         const userTools = await fetchUserTools(walletAddress);
         setTools(userTools);
 
-        // Fetch NFT tools if wallet is connected
-        if (wallet && publicKey) {
-          const nftTools = await fetchNFTTools(
-            connection, 
-            wallet, 
-            publicKey, 
-            idlMintPay
-          );
-          setBoughtTools(nftTools);
-        }
       } catch (error) {
         console.error('Error loading tools:', error);
       } finally {
