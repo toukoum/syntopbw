@@ -16,7 +16,13 @@ import ToolProcessingCard from "./ToolProcessingCard";
 import ToolResultCard from "./ToolResultCard";
 import { TransactionState } from "./types";
 import { BuildSwapInstruction, QueryMintDecimals } from "@/utils/crypto";
-import { SOL, USDC, wBTC, wETH } from "@/components/constantes/tokenAddresses";
+import {
+  SOL,
+  USDC,
+  wBTC,
+  wETH,
+  META,
+} from "@/components/constantes/tokenAddresses";
 
 interface WalletConfirmationProps {
   toolCallId: string;
@@ -80,6 +86,9 @@ export default function WalletConfirmation({
             case "ETH":
               inputAddress = wETH;
               break;
+            case "META":
+              inputAddress = META;
+              break;
             default:
               throw new Error("Invalid input token");
           }
@@ -97,11 +106,14 @@ export default function WalletConfirmation({
             case "ETH":
               outputAddress = wETH;
               break;
+            case "META":
+              outputAddress = META;
+              break;
             default:
               throw new Error("Invalid output token");
           }
 
-          const decimals = await QueryMintDecimals(connection,inputAddress);
+          const decimals = await QueryMintDecimals(connection, inputAddress);
 
           const instruction = await BuildSwapInstruction(
             inputAddress,
@@ -136,7 +148,7 @@ export default function WalletConfirmation({
         });
         addToolResult({ toolCallId, result });
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Transaction error:", err);
       setTxState(TransactionState.FAILED);
       setError(err.message || "Transaction failed");
