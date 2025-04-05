@@ -1,0 +1,90 @@
+import { openai } from "@ai-sdk/openai";
+import { streamText } from "ai";
+//import { askForConfirmation } from "./tools/askForConfirmation";
+import { createOllama } from "ollama-ai-provider";
+import { send } from "./tools/send";
+//import { convert } from "./tools/convert";
+//import { getAvaxBalance } from "./tools/getAvaxBalance";
+import { swap } from "./tools/swap";
+//import { get } from "lodash";
+import { getLocation } from "./tools/getLocation";
+import { getWeather } from "./tools/getWeather";
+import { SYSTEM_PROMPT }  from "./prompt";
+
+import { loadDynamicTools } from "./util/toolManagers";
+import { addContact, getContact } from "./tools/contact";
+
+export const maxDuration = 30;
+
+const LOCAL_MODELS = {
+	"llama": "llama3.1:latest",
+	"mistral": "mistral:latest",
+	"deepseek": "deepseek-r1:8b",
+}
+
+
+const selectedLocalModel = LOCAL_MODELS["llama"];
+
+export async function POST(req: Request) {
+	try {
+		const { messages, isLocal } = await req.json();
+		console.log("[CHAT-API] Incoming messages:", messages);
+		console.log('isLocal:', isLocal);
+		
+		messages.unshift(SYSTEM_PROMPT);
+
+		const staticTools = {
+			//convert,
+			send,
+			swap,
+			getLocation,
+			getWeather,
+      addContact,
+      getContact,
+		};
+
+		// Load dynamic tools from localStorage
+		//const dynamicTools = loadDynamicTools();
+
+		// Merge static and dynamic tools
+		const tools = {
+			...staticTools,
+			//...dynamicTools
+		};
+
+		// Log available tools for debugging
+		console.log("Available tools:", Object.keys(tools));
+
+
+
+
+		let result;
+
+		if (!isLocal) {
+			result = streamText({
+				model: openai("gpt-4o-mini"),
+				messages,
+				tools,
+				maxSteps: 5,
+			});
+		} else {
+			const ollama = createOllama({ baseURL: process.env.OLLAMA_URL + "/api" });
+			result = streamText({
+				model: ollama(selectedLocalModel, { simulateStreaming: true }),
+				messages,
+				tools,
+				maxSteps: 5,
+			});
+		}
+
+		return result.toDataStreamResponse({
+			getErrorMessage: (error) => {
+				console.error("ERREUR AVEC LE STREAMING DE LA RESPONSE API CALL:", error);
+				return "An error occurred during the API call.";
+			},
+		});
+	} catch (err) {
+		console.error("ERREUR PLUS GLOBALE", err);
+		return new Response("Internal Server Error", { status: 500 });
+	}
+}
