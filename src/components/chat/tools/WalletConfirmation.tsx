@@ -148,7 +148,7 @@ export default function WalletConfirmation({
         });
         addToolResult({ toolCallId, result });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Transaction error:", err);
       setTxState(TransactionState.FAILED);
       setError(err.message || "Transaction failed");
