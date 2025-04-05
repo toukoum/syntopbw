@@ -10,11 +10,9 @@ import {
   MessageSquare,
   Moon,
   MoreHorizontal,
-  ShoppingBag,
-  Sparkles,
+  Plus,
   Sun,
-  Trash2,
-  Wrench,
+  Trash2
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
@@ -60,7 +58,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, generateUUID } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export function AppSidebar() {
@@ -71,35 +69,21 @@ export function AppSidebar() {
   const chats = useChatStore((state) => state.chats);
   const handleDelete = useChatStore((state) => state.handleDelete);
   const userName = useChatStore((state) => state.userName);
+  const saveMessages = useChatStore((state) => state.saveMessages);
+  const setCurrentChatId = useChatStore((state) => state.setCurrentChatId);
   const isMobile = useIsMobile();
 
-  const [showAllChats, setShowAllChats] = useState(false);
-  const MAX_CHATS_TO_SHOW = 10;
+  // Function to create a new chat
+  const handleNewChat = (e) => {
+    e.stopPropagation(); // Prevent sidebar toggle when clicking the new chat button
+    const newChatId = generateUUID();
+    saveMessages(newChatId, []);
+    setCurrentChatId(newChatId);
+    router.push(`/agent/c/${newChatId}`);
+  };
 
-  // Main navigation items with gradients
-  const navigationItems = [
-    {
-      title: "Agent",
-      href: "/agent",
-      icon: Sparkles,
-      tooltip: "Manage your agent",
-      gradient: "linear-gradient(to right top, rgb(251, 231, 115), rgb(241, 142, 67))"
-    },
-    {
-      title: "Build",
-      href: "/build",
-      icon: Wrench,
-      tooltip: "Create custom tools",
-      gradient: "linear-gradient(to right top, rgb(230, 97, 155), rgb(232, 71, 73))"
-    },
-    {
-      title: "Shop",
-      href: "/shop",
-      icon: ShoppingBag,
-      tooltip: "Browse and buy AI tools",
-      gradient: "linear-gradient(to right top, rgb(57, 186, 237), rgb(50, 80, 158))"
-    },
-  ];
+  const [showAllChats, setShowAllChats] = useState(false);
+  const MAX_CHATS_TO_SHOW = 15;
 
   // Get chat entries sorted by most recent
   const sortedChats = Object.entries(chats || {})
@@ -117,7 +101,7 @@ export function AppSidebar() {
       {/* Mobile sidebar toggle button - Only visible on mobile */}
       {isMobile && (
         <button
-          className="fixed z-50 bottom-4 right-4 p-3 rounded-full bg-primary text-primary-foreground shadow-lg md:hidden"
+          className="fixed z-50 bottom-4 right-4 p-3 bg-primary text-primary-foreground shadow-lg md:hidden"
           onClick={toggleSidebar}
           aria-label="Toggle sidebar"
         >
@@ -125,10 +109,12 @@ export function AppSidebar() {
         </button>
       )}
 
-      <Sidebar collapsible="icon">
+      <Sidebar
+        collapsible="icon"
+        onClick={state === "collapsed" ? toggleSidebar : undefined}
+      >
         <SidebarHeader className={cn(
-          "py-6",
-          state === "collapsed" ? "flex flex-col items-center" : ""
+          state === "collapsed" ? "flex flex-col items-center py-6" : "py-6"
         )}>
           <div className={cn(
             "flex items-center",
@@ -136,7 +122,10 @@ export function AppSidebar() {
           )}>
             <div
               className="flex items-center gap-3 cursor-pointer"
-              onClick={() => router.push('/')}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent sidebar toggle
+                router.push('/');
+              }}
             >
               <Image
                 src="/synto/logo-white-synto.svg"
@@ -156,95 +145,51 @@ export function AppSidebar() {
                 variant="ghost"
                 size="icon"
                 onClick={toggleSidebar}
-                className="rounded-full"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             )}
           </div>
 
-          {/* Toggle button for collapsed state - centered below logo */}
-          {state === "collapsed" && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="mt-4 rounded-full"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          )}
+          {/* Only show separator in expanded state */}
+          {state === "expanded" && <SidebarSeparator className="mt-6" />}
         </SidebarHeader>
 
-        <SidebarSeparator className="mb-6" />
-
         <SidebarContent className="hide-scrollbar px-2">
-          {/* Main Navigation */}
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu className={cn(state === "collapsed" ? "gap-4" : "")}>
-                {navigationItems.map((item) => (
-                  <SidebarMenuItem key={item.href} className="w-full min-w-6">
-                    {state === "collapsed" ? (
-                      <TooltipProvider delayDuration={0}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <SidebarMenuButton
-                              asChild
-                              isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
-                              className="w-full flex justify-center items-center"
-                            >
-                              <Link href={item.href}>
-                                <div
-                                  className="rounded-xl flex items-center justify-center"
-                                  style={{
-                                    backgroundImage: item.gradient,
-                                    width: "4rem",  // Increased size
-                                    height: "4rem",  // Increased size
-                                    minWidth: "4rem", // Ensures minimum width
-                                    margin: "0 auto"   // Centers the icon
-                                  }}
-                                >
-                                  <item.icon className="h-5 w-5 text-white" />
-                                </div>
-                              </Link>
-                            </SidebarMenuButton>
-                          </TooltipTrigger>
-                          <TooltipContent side="right">
-                            {item.title}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ) : (
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
-                        className="px-3 py-8"
-                      >
-                        <Link href={item.href} className="flex items-center">
-                          <div
-                            className="rounded-lg flex items-center justify-center"
-                            style={{
-                              backgroundImage: item.gradient,
-                              width: "2.5rem",
-                              height: "2.5rem"
-                            }}
-                          >
-                            <item.icon className="h-5 w-5 text-white" />
-                          </div>
-                          <span className="ml-3 text-base">{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    )}
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          {/* New Chat button - shown in both states */}
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size={state === "collapsed" ? "icon" : "sm"}
+                  className={
+                    state === "collapsed" ? "mb-4 w-10 h-10 self-center" : "w-full p-4 py-5"
+                  }
+                  onClick={handleNewChat}
+                >
+                  <Plus className="h-5 w-5" strokeWidth={2} />
+                  {state === "expanded" && <span className="ml-2">New Chat</span>}
+                </Button>
+              </TooltipTrigger>
+              {state === "collapsed" && (
+                <TooltipContent side="right">
+                  New Chat
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild className="flex justify-center w-full cursor-pointer">
+                <ChevronRight className="h-5 w-5" strokeWidth={2} />
+              </TooltipTrigger>
+            </Tooltip>
+          </TooltipProvider>
 
           {/* Previous Chats - Hide completely when sidebar is collapsed */}
           {state === "expanded" && (
-            <SidebarGroup className="flex-1 flex flex-col">
+            <SidebarGroup className="flex-1 flex flex-col px-0">
               <div className="flex items-center justify-between">
                 <SidebarGroupLabel>Recent Conversations</SidebarGroupLabel>
               </div>
@@ -263,7 +208,10 @@ export function AppSidebar() {
                         isActive={pathname === `/agent/c/${id}`}
                         className="px-3 py-2.5 text-sm rounded-lg"
                       >
-                        <Link href={`/agent/c/${id}`}>
+                        <Link
+                          href={`/agent/c/${id}`}
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <MessageSquare className="h-4 w-4" />
                           <span className="truncate">{chat.messages.length > 0
                             ? (chat.messages[0].content.length > 25
@@ -307,7 +255,12 @@ export function AppSidebar() {
                                 </DialogDescription>
                               </DialogHeader>
                               <div className="flex justify-end gap-2">
-                                <Button variant="outline" onClick={() => { }}>
+                                <Button
+                                  variant="outline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                  }}
+                                >
                                   Cancel
                                 </Button>
                                 <Button
@@ -334,7 +287,10 @@ export function AppSidebar() {
                     variant="ghost"
                     size="sm"
                     className="w-full mt-3 text-xs text-muted-foreground"
-                    onClick={() => setShowAllChats(!showAllChats)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowAllChats(!showAllChats);
+                    }}
                   >
                     {showAllChats ? (
                       <>Show less <ChevronDown className="h-3 w-3 ml-1 rotate-180" /></>
@@ -357,7 +313,10 @@ export function AppSidebar() {
             <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Avatar className="cursor-pointer">
+                  <Avatar
+                    className="cursor-pointer"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <AvatarImage src="/synto/agentProfile.png" alt={userName} />
                     <AvatarFallback className="bg-primary text-primary-foreground text-lg font-medium">
                       {userName.substring(0, 2).toUpperCase()}
@@ -385,8 +344,10 @@ export function AppSidebar() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="rounded-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTheme(theme === "dark" ? "light" : "dark");
+                }}
               >
                 {theme === "dark" ? (
                   <Sun className="h-5 w-5" />
