@@ -1,6 +1,7 @@
 "use client";
 
 import useChatStore from "@/app/hooks/useChatStore";
+import { executeToolCall } from "@/components/chat/tools/ToolExecutor"; // Import the tool executor
 import { useChat } from "@ai-sdk/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ChatRequestOptions, generateId } from "ai";
@@ -54,131 +55,9 @@ export default function Chat({ initialMessages, id }: ChatProps) {
       console.error("Chat error:", error.message, error.cause);
       toast.error(`Error: ${error.message}`);
     },
+    // Just delegate to our extracted tool executor
     onToolCall: async (tool) => {
-      const toolName = tool.toolCall.toolName;
-      const args = tool.toolCall.args;
-      console.log('Tool call:', toolName, args);
-
-      // Exécuter tous les outils non-wallet directement ici
-      if (!['send', 'swap', 'bridge', 'stake', 'convert'].includes(toolName.toLowerCase())) {
-        try {
-          console.log(`Executing non-wallet tool: ${toolName}`);
-
-          // Vérifier si l'utilisateur a un portefeuille connecté pour les outils qui en ont besoin
-          if (['addcontact', 'getcontact'].includes(toolName.toLowerCase()) && !userWalletAddress) {
-            throw new Error("Wallet connection required to manage contacts");
-          }
-
-          // Exécuter différents outils en fonction du nom
-          switch (toolName.toLowerCase()) {
-            case 'getweather':
-              // Simuler une API météo
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              return JSON.stringify({
-                success: true,
-                data: {
-                  location: args.city,
-                  temperature: Math.floor(Math.random() * 30) + 5,
-                  condition: ['Sunny', 'Cloudy', 'Rainy', 'Snowy'][Math.floor(Math.random() * 4)],
-                  humidity: Math.floor(Math.random() * 100),
-                  wind: Math.floor(Math.random() * 30),
-                },
-                message: `Weather information for ${args.city}`
-              });
-
-            case 'getlocation':
-              // Simuler une API de localisation
-              await new Promise(resolve => setTimeout(resolve, 800));
-              return JSON.stringify({
-                success: true,
-                data: {
-                  city: ['New York', 'London', 'Tokyo', 'Paris'][Math.floor(Math.random() * 4)],
-                  country: ['USA', 'UK', 'Japan', 'France'][Math.floor(Math.random() * 4)],
-                },
-                message: 'Location determined successfully'
-              });
-
-            case 'addcontact':
-              // Appeler l'API pour ajouter un contact
-              console.log(`Executing addContact tool for: ${args.name}`);
-              const addContactResponse = await fetch('/api/contacts/add', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  userWalletAddress,
-                  contactName: args.name,
-                  contactWalletAddress: args.address
-                }),
-              });
-
-              const addContactData = await addContactResponse.json();
-
-              if (!addContactResponse.ok) {
-                throw new Error(addContactData.error || 'Failed to add contact');
-              }
-
-              return JSON.stringify(addContactData);
-
-            case 'getcontact':
-              // Appeler l'API pour obtenir un contact
-              console.log(`Executing getContact tool for: ${args.name}`);
-              const getContactResponse = await fetch(`/api/contacts/get?userWalletAddress=${encodeURIComponent(userWalletAddress || '')}&contactName=${encodeURIComponent(args.name)}`);
-
-              const getContactData = await getContactResponse.json();
-
-              if (!getContactResponse.ok) {
-                // Not found is handled as a result with success: false
-                if (getContactResponse.status === 404) {
-                  return JSON.stringify({
-                    success: false,
-                    data: null,
-                    error: `Contact '${args.name}' not found`,
-                    message: `No contact found with name ${args.name}`
-                  });
-                }
-
-                throw new Error(getContactData.error || 'Failed to get contact');
-              }
-
-              return JSON.stringify(getContactData);
-
-            case 'visualizedata':
-            case 'generatechart':
-              // Simuler une visualisation de données
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              return JSON.stringify({
-                success: true,
-                data: {
-                  chartType: args.type || 'bar',
-                  dataPoints: 8,
-                  url: 'https://example.com/chart',
-                },
-                message: 'Chart generated successfully'
-              });
-
-            default:
-              // Traitement générique pour d'autres outils non-wallet
-              console.log(`Executing generic tool: ${toolName}`);
-              await new Promise(resolve => setTimeout(resolve, 500));
-              return JSON.stringify({
-                success: true,
-                data: { executed: true, timestamp: new Date().toISOString() },
-                message: `Tool ${toolName} executed successfully`
-              });
-          }
-        } catch (error: any) {
-          console.error(`Error executing tool ${toolName}:`, error);
-          return JSON.stringify({
-            success: false,
-            error: error.message || 'Tool execution failed'
-          });
-        }
-      }
-
-      // Pour les outils wallet, retourner null pour qu'ils soient gérés par le UI
-      return null;
+      return executeToolCall(tool, userWalletAddress);
     },
   });
 
