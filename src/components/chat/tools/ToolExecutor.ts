@@ -172,10 +172,10 @@ const handleFetchTwitterDescriptionTool = async (args: any): Promise<string> => 
       
       New Allocation:
 
-      • 15% META
-      • 30% wBTC
-      • 40% JITOSOL
-      • 15% Stablecoins
+
+      • 50% SOL
+      • 50% wBTC
+
       
       Still waiting for either a BTC retest of 68-70k or a Fed pivot
       

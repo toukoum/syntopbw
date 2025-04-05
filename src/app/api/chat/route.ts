@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
 		if (!isLocal) {
 			result = streamText({
-				model: openai("gpt-4o-mini"),
+				model: openai("gpt-4o"),
 				messages,
 				tools,
 				maxSteps: 5,
