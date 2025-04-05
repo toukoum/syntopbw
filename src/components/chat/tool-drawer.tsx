@@ -201,30 +201,6 @@ export function ToolsDrawer({ walletAddress }: ToolsDrawerProps) {
             </div>
           </div>
 
-          {/* Footer - with max-width container */}
-          <div className="border-t">
-            <div className="w-full max-w-3xl mx-auto p-4">
-              <div className="flex justify-between">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground"
-                  asChild
-                >
-                  <a href="/agent" className="flex items-center gap-1">
-                    <Settings className="h-4 w-4" />
-                    Manage All Tools
-                  </a>
-                </Button>
-                <Button
-                  onClick={() => setOpen(false)}
-                  variant="outline"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
         </DrawerContent>
       </DrawerPortal>
     </Drawer>

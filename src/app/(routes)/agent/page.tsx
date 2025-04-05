@@ -1,26 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import useChatStore from "@/app/hooks/useChatStore";
 import AgentProfile from "@/components/agent/agent-profile";
 import AgentTools from "@/components/agent/agent-tools";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateUUID } from "@/lib/utils";
-import useChatStore from "@/app/hooks/useChatStore";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { MessageSquare, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 export default function AgentPage() {
   const [activeTab, setActiveTab] = useState("tools");
   const { publicKey } = useWallet();
   const router = useRouter();
-  
+
   // Récupérer les fonctions et les données du store
   const chats = useChatStore((state) => state.chats);
   const saveMessages = useChatStore((state) => state.saveMessages);
   const setCurrentChatId = useChatStore((state) => state.setCurrentChatId);
-  
+
   // Générer un ID stable pour une nouvelle conversation si nécessaire
   const newChatId = useMemo(() => generateUUID(), []);
 
@@ -29,16 +29,16 @@ export default function AgentPage() {
     if (activeTab === "chat" && publicKey) {
       // Vérifier s'il y a des conversations existantes
       const chatEntries = Object.entries(chats);
-      
+
       if (chatEntries.length > 0) {
         // Trier les conversations par date (la plus récente en premier)
-        const sortedChats = chatEntries.sort(([, a], [, b]) => 
+        const sortedChats = chatEntries.sort(([, a], [, b]) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
-        
+
         // Récupérer l'ID de la conversation la plus récente
         const [mostRecentChatId] = sortedChats[0];
-        
+
         // Définir comme conversation active et rediriger
         setCurrentChatId(mostRecentChatId);
         router.push(`/agent/c/${mostRecentChatId}`);
@@ -75,10 +75,10 @@ export default function AgentPage() {
           defaultValue="tools"
           value={activeTab}
           onValueChange={setActiveTab}
-          className="w-full max-w-md"
+          className="w-full max-w-md h-full "
         >
-          <TabsList className="grid grid-cols-2 w-72">
-            <TabsTrigger value="tools" className="flex items-center gap-2">
+          <TabsList className="h-full grid  grid-cols-2 w-72">
+            <TabsTrigger value="tools" className="h-full flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
               Agent
             </TabsTrigger>

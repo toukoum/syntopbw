@@ -2,7 +2,6 @@
 'use server'
 
 import { PrismaClient } from '@prisma/client';
-import { NFTAsset } from '@/types/nft';
 
 const prisma = new PrismaClient();
 
@@ -60,12 +59,22 @@ export async function fetchUserTools(walletAddress: string) {
       },
     });
 
-    // Format all tools
-    const formattedUserTools = userCreatedTools.map(formatToolResponse);
-    const formattedDefaultTools = defaultTools.map(formatToolResponse);
 
-    // Combine all tools
-    const allTools = [...formattedUserTools, ...formattedDefaultTools];
+    const processedIds = new Set();
+    const allTools: ReturnType<typeof formatToolResponse>[] = [];
+
+    // Process user created tools first
+    userCreatedTools.forEach(tool => {
+      allTools.push(formatToolResponse(tool));
+      processedIds.add(tool.id);
+    });
+
+    // Only add default tools that aren't already included
+    defaultTools.forEach(tool => {
+      if (!processedIds.has(tool.id)) {
+        allTools.push(formatToolResponse(tool));
+      }
+    });
 
     return allTools;
   } catch (error) {

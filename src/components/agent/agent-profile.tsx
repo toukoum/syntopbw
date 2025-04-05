@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 interface UserData {
   id: string;
@@ -46,12 +46,12 @@ export default function AgentProfile({ walletAddress }: { walletAddress: string 
       <CardContent className="p-0">
         <div className="flex flex-col md:flex-row items-center gap-6 p-6">
           <div className="relative flex-shrink-0">
-            <div className="rounded-full overflow-hidden border-2 border-primary/20 w-32 h-32 flex items-center justify-center bg-black">
+            <div className="rounded-full overflow-hidden w-32 h-32 flex items-center justify-center bg-black">
               {loading ? (
                 <Skeleton className="w-32 h-32 rounded-full" />
               ) : (
                 <Image
-                  src="/synto/agentProfile.png"
+                  src="/synto/agentProfilePbw.png"
                   alt="Agent Avatar"
                   width={128}
                   height={128}
@@ -60,12 +60,12 @@ export default function AgentProfile({ walletAddress }: { walletAddress: string 
               )}
             </div>
           </div>
-          
+
           <div className="flex flex-col text-center md:text-left">
             <h1 className="text-2xl font-bold">
-              {loading ? <Skeleton className="h-8 w-48" /> : "Agent"}
+              {loading ? <Skeleton className="h-8 w-48" /> : "Synto"}
             </h1>
-            
+
             <div className="text-muted-foreground mt-2 max-w-md">
               {loading ? (
                 <>
@@ -76,22 +76,15 @@ export default function AgentProfile({ walletAddress }: { walletAddress: string 
                 "Your personal AI assistant powered by blockchain tools. Use the tools you've acquired to enhance its capabilities."
               )}
             </div>
-            
+
             <div className="flex flex-wrap gap-4 mt-4 justify-center md:justify-start">
               <div className="flex flex-col">
                 <span className="text-xs text-muted-foreground">Owned Tools</span>
                 <span className="font-bold">
-                  {loading ? <Skeleton className="h-6 w-8" /> : userData?.stats.ownedToolsCount || 0}
-                </span>
-              </div>
-              
-              <div className="flex flex-col">
-                <span className="text-xs text-muted-foreground">Created Tools</span>
-                <span className="font-bold">
                   {loading ? <Skeleton className="h-6 w-8" /> : userData?.stats.createdToolsCount || 0}
                 </span>
               </div>
-              
+
               <div className="flex flex-col">
                 <span className="text-xs text-muted-foreground">Address</span>
                 <span className="font-mono text-xs truncate max-w-32">

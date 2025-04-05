@@ -160,6 +160,7 @@ const handleGenericTool = async (toolName: string): Promise<string> => {
   });
 };
 
+
 const handleFetchTwitterDescriptionTool = async (args: any): Promise<string> => {
   console.log(`Executing fetchTwitterDescription tool for: ${args.username}`);
   return JSON.stringify({

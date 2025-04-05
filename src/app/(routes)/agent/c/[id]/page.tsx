@@ -8,12 +8,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageSquare, Sparkles } from "lucide-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function ConversationPage({ params }: { params: { id: string } }) {
   const { publicKey } = useWallet();
   const id = params.id;
-  const router = useRouter();
   
   const getChatById = useChatStore((state) => state.getChatById);
   const saveMessages = useChatStore((state) => state.saveMessages);
@@ -41,7 +39,7 @@ export default function ConversationPage({ params }: { params: { id: string } })
             Please connect your wallet to chat with the agent.
           </p>
           <div className="mt-6">
-            <WalletMultiButton />
+            <WalletMultiButton  />
           </div>
         </div>
       </div>
@@ -52,15 +50,15 @@ export default function ConversationPage({ params }: { params: { id: string } })
     <div className="w-full h-full flex flex-col">
       {/* Header with tabs and wallet */}
       <div className="w-full border-b flex justify-between items-center px-4 py-2 sticky top-0 z-10 bg-background">
-        <Tabs defaultValue="chat" className="w-full max-w-md">
-          <TabsList className="grid grid-cols-2 w-72">
-            <TabsTrigger value="tools" className="flex items-center gap-2" asChild>
+        <Tabs defaultValue="chat" className="w-full  h-full max-w-md">
+          <TabsList className="grid grid-cols-2 w-72  h-full">
+            <TabsTrigger value="tools" className="flex  h-full items-center gap-2" asChild>
               <Link href="/agent">
                 <Sparkles className="h-4 w-4" />
                 Agent
               </Link>
             </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
+            <TabsTrigger value="chat" className="flex  h-full items-center gap-2">
               <MessageSquare className="h-4 w-4" />
               Chat
             </TabsTrigger>

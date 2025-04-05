@@ -153,7 +153,7 @@ function ChatMessage({ message, isLast, isLoading, reload, addToolResult }: Chat
       <ChatBubble variant={message.role === "user" ? "sent" : "received"}>
         {message.role === "assistant" && (
           <ChatBubbleAvatar
-            src="/synto/agentProfile.png"
+            src="/synto/agentProfilePbw.png"
             width={20}
             height={20}
             className="object-contain"

@@ -61,6 +61,7 @@ export default function ChatTopbar({
       <div className="flex items-center space-x-3">
         <div className="flex items-center space-x-4">
           <Button
+            variant="outline"
             onClick={createNewChat}
             className="p-2"
             title="New Chat"
