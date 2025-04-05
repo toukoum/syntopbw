@@ -317,7 +317,7 @@ export function AppSidebar() {
                     className="cursor-pointer"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <AvatarImage src="/synto/agentProfile.png" alt={userName} />
+                    <AvatarImage src="/synto/agentProfilePbw.png" alt={userName} />
                     <AvatarFallback className="bg-primary text-primary-foreground text-lg font-medium">
                       {userName.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
@@ -332,7 +332,7 @@ export function AppSidebar() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Avatar className="cursor-pointer">
-                  <AvatarImage src="/synto/agentProfile.png" alt={userName} />
+                  <AvatarImage src="/synto/agentProfilePbw.png" alt={userName} />
                   <AvatarFallback className="bg-primary text-primary-foreground text-lg font-medium">
                     {userName.substring(0, 2).toUpperCase()}
                   </AvatarFallback>

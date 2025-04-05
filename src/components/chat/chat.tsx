@@ -140,11 +140,11 @@ export default function Chat({ initialMessages, id }: ChatProps) {
             <div className="relative">
               <div className="absolute -z-10 inset-0 rounded-full bg-primary/10 blur-3xl opacity-20 animate-pulse"></div>
               <Image
-                src="/synto/agentProfile.png"
+                src="/synto/agentProfilePbw.png"
                 alt="Agent"
                 width={120}
                 height={120}
-                className="w-24  rounded-full border-2 border-primary/20 shadow-xl object-cover"
+                className="w-24  rounded-full shadow-xl object-cover"
               />
             </div>
             <h2 className="text-2xl font-bold mt-6 mb-2">Synto Agent</h2>
