@@ -3,7 +3,6 @@
 import { fetchToolsForDrawer, updateToolStatus } from "@/app/actions/tools";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -11,9 +10,8 @@ import {
   DrawerPortal,
   DrawerTrigger
 } from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { PlugZap, Search, Settings, Sparkles } from "lucide-react";
+import { ChevronUp, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -50,6 +48,62 @@ export function ToolsDrawer({ walletAddress }: ToolsDrawerProps) {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [enabledToolsCount, setEnabledToolsCount] = useState(0);
+
+  // Load tools when component mounts or wallet address changes
+  useEffect(() => {
+    const loadTools = async () => {
+      if (!walletAddress) return;
+
+      try {
+        setLoading(true);
+        const fetchedTools = await fetchToolsForDrawer(walletAddress);
+
+        // Ensure there are no duplicate tools by using a Map with tool.id as key
+        const uniqueTools = Array.from(
+          new Map(fetchedTools.map(tool => [tool.id, { ...tool, image: tool.image || "" }])).values()
+        ) as Tool[];
+
+        setTools(uniqueTools);
+        setFilteredTools(uniqueTools);
+        setEnabledToolsCount(uniqueTools.filter(tool => tool.enabled).length);
+      } catch (error) {
+        console.error("Error loading tools:", error);
+        if (open) toast.error("Failed to load tools");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTools();
+  }, [walletAddress]);
+
+  // Refresh tools when drawer opens
+  useEffect(() => {
+    if (open && walletAddress) {
+      const refreshTools = async () => {
+        try {
+          setLoading(true);
+          const fetchedTools = await fetchToolsForDrawer(walletAddress);
+
+          const uniqueTools = Array.from(
+            new Map(fetchedTools.map(tool => [tool.id, { ...tool, image: tool.image || "" }])).values()
+          ) as Tool[];
+
+          setTools(uniqueTools);
+          setFilteredTools(uniqueTools);
+          setEnabledToolsCount(uniqueTools.filter(tool => tool.enabled).length);
+        } catch (error) {
+          console.error("Error refreshing tools:", error);
+          toast.error("Failed to refresh tools");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      refreshTools();
+    }
+  }, [open, walletAddress]);
 
   useEffect(() => {
     // Filter tools when search query changes
@@ -68,43 +122,16 @@ export function ToolsDrawer({ walletAddress }: ToolsDrawerProps) {
     }
   }, [searchQuery, tools]);
 
-  useEffect(() => {
-    const loadTools = async () => {
-      if (!open) return;
-
-      try {
-        setLoading(true);
-        const fetchedTools = await fetchToolsForDrawer(walletAddress);
-
-        // Ensure there are no duplicate tools by using a Map with tool.id as key
-        const uniqueTools = Array.from(
-          new Map(fetchedTools.map(tool => [tool.id, { ...tool, image: tool.image || "" }])).values()
-        ) as Tool[];
-
-        setTools(uniqueTools);
-        setFilteredTools(uniqueTools);
-      } catch (error) {
-        console.error("Error loading tools:", error);
-        toast.error("Failed to load tools");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (open && walletAddress) {
-      loadTools();
-    }
-  }, [open, walletAddress]);
-
   const handleToggle = async (id: string, checked: boolean) => {
     try {
       // Optimistically update UI
-      setTools(tools.map(tool =>
+      const updatedTools = tools.map(tool =>
         tool.id === id ? { ...tool, enabled: checked } : tool
-      ));
-      setFilteredTools(filteredTools.map(tool =>
-        tool.id === id ? { ...tool, enabled: checked } : tool
-      ));
+      );
+
+      setTools(updatedTools);
+      setFilteredTools(updatedTools);
+      setEnabledToolsCount(updatedTools.filter(tool => tool.enabled).length);
 
       // Update in database
       const result = await updateToolStatus(id, checked);
@@ -113,6 +140,7 @@ export function ToolsDrawer({ walletAddress }: ToolsDrawerProps) {
         // Revert if failed
         setTools(tools);
         setFilteredTools(filteredTools);
+        setEnabledToolsCount(tools.filter(tool => tool.enabled).length);
         toast.error("Failed to update tool status");
       }
     } catch (error) {
@@ -120,35 +148,31 @@ export function ToolsDrawer({ walletAddress }: ToolsDrawerProps) {
       // Revert on error
       setTools(tools);
       setFilteredTools(filteredTools);
+      setEnabledToolsCount(tools.filter(tool => tool.enabled).length);
       toast.error("Failed to update tool status");
     }
   };
 
-  const enabledToolsCount = tools.filter(tool => tool.enabled).length;
   const totalToolsCount = tools.length;
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="rounded-full flex items-center justify-center relative"
-        >
-          <PlugZap className="h-5 w-5" />
-          {enabledToolsCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              {enabledToolsCount}
+        <div className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-black/30 backdrop-blur-md border border-amber-500/40 text-white/90 rounded-full text-xs font-medium select-none  transition-all shadow-sm">
+          <ChevronUp className="h-4 w-4 text-amber-500 hover:border-amber-400" />
+          <span>
+            <span className="flex items-center gap-1 font-semibold">
+              Tools: <span className="text-amber-400 ">{enabledToolsCount}</span>
             </span>
-          )}
-        </Button>
+          </span>
+        </div>
       </DrawerTrigger>
 
       <DrawerPortal>
         <DrawerOverlay className="fixed inset-0 bg-black/40 z-40" />
         <DrawerContent className="bg-background flex flex-col rounded-t-[10px] h-[80%] fixed bottom-0 left-0 right-0 z-50 outline-none">
 
-          {/* Header section - with max-width container */}
+          {/* Header section */}
           <div className="px-4 py-4 w-full max-w-3xl mx-auto">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Agent Tools</h2>
@@ -159,20 +183,9 @@ export function ToolsDrawer({ walletAddress }: ToolsDrawerProps) {
             <p className="text-sm text-muted-foreground mt-1">
               Manage which tools your agent can use in this conversation
             </p>
-
-            {/* Search input */}
-            <div className="relative mt-4">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search tools..."
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
           </div>
 
-          {/* Scrollable content - with max-width container for the content but not for the scroll area */}
+          {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto hide-scrollbar">
             <div className="w-full max-w-3xl mx-auto p-4">
               {loading ? (
@@ -200,12 +213,13 @@ export function ToolsDrawer({ walletAddress }: ToolsDrawerProps) {
               )}
             </div>
           </div>
-
         </DrawerContent>
       </DrawerPortal>
     </Drawer>
   );
 }
+
+// ToolItem component remains unchanged
 
 function ToolItem({ tool, onToggle }: { tool: Tool; onToggle: (checked: boolean) => void }) {
   const getInitials = (name: string) => {

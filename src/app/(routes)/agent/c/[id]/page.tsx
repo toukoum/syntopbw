@@ -6,8 +6,9 @@ import { ChatLayout } from "@/components/chat/chat-layout";
 import useChatStore from "@/app/hooks/useChatStore";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageSquare, Sparkles } from "lucide-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
+import { CustomWalletButton } from "@/components/solana/customwalletbutton";
+
 
 export default function ConversationPage({
   params,
@@ -43,7 +44,7 @@ export default function ConversationPage({
             Please connect your wallet to chat with the agent.
           </p>
           <div className="mt-6">
-            <WalletMultiButton  />
+            <CustomWalletButton  />
           </div>
         </div>
       </div>
@@ -68,12 +69,7 @@ export default function ConversationPage({
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        <WalletMultiButton
-          style={{
-            backgroundColor: "#007AFF",
-            borderRadius: "2rem",
-          }}
-        />
+        <CustomWalletButton/>
       </div>
 
       {/* Chat Content */}

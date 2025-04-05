@@ -69,7 +69,7 @@ const ChatBubbleAvatar: React.FC<ChatBubbleAvatarProps> = ({
   width,
   height,
 }) => (
-  <Avatar className="mt-3">
+  <Avatar className="mt-3 hidden sm:block">
     <AvatarImage
       src={src}
       alt="Avatar"

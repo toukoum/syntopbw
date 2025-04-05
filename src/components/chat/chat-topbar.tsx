@@ -16,6 +16,7 @@ interface ChatTopbarProps {
   chatId?: string;
   messages: Message[];
   setMessages: (messages: Message[]) => void;
+  isNewChat?: boolean;
 }
 
 export default function ChatTopbar({
@@ -23,6 +24,7 @@ export default function ChatTopbar({
   chatId,
   messages,
   setMessages,
+  isNewChat = false,
 }: ChatTopbarProps) {
   const [isLoc, setIsLoc] = React.useState(false);
   const setIsLocal = useChatStore((state) => state.setIsLocal);
@@ -60,15 +62,19 @@ export default function ChatTopbar({
 
       <div className="flex items-center space-x-3">
         <div className="flex items-center space-x-4">
-          <Button
-            variant="outline"
-            onClick={createNewChat}
-            className="p-2"
-            title="New Chat"
-          >
-            New Chat
-            <Plus className="h-5 w-5" />
-          </Button>
+          {
+            !isNewChat && (
+              <Button
+                variant="outline"
+                onClick={createNewChat}
+                className="p-2"
+                title="New Chat"
+              >
+                New Chat
+                <Plus className="h-5 w-5" />
+              </Button>
+            )
+          }
           <Switch
             id="private-mode"
             checked={isLocal}

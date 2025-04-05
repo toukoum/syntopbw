@@ -1,12 +1,9 @@
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
-//import { askForConfirmation } from "./tools/askForConfirmation";
 import { createOllama } from "ollama-ai-provider";
 import { send } from "./tools/send";
-//import { convert } from "./tools/convert";
-//import { getAvaxBalance } from "./tools/getAvaxBalance";
+import { convert } from "./tools/convert";
 import { swap } from "./tools/swap";
-//import { get } from "lodash";
 import { getLocation } from "./tools/getLocation";
 import { getWeather } from "./tools/getWeather";
 import { SYSTEM_PROMPT }  from "./prompt";
@@ -36,7 +33,7 @@ export async function POST(req: Request) {
 		messages.unshift(SYSTEM_PROMPT);
 
 		const staticTools = {
-			//convert,
+			convert,
 			send,
 			swap,
 			checkPortfolio,
@@ -44,7 +41,7 @@ export async function POST(req: Request) {
 			getWeather,
       addContact,
       getContact,
-	  fetchTwitterDescription,
+	    fetchTwitterDescription,
 		};
 
 		// Load dynamic tools from localStorage
@@ -66,7 +63,7 @@ export async function POST(req: Request) {
 
 		if (!isLocal) {
 			result = streamText({
-				model: openai("gpt-4o"),
+				model: openai("gpt-4o-mini"),
 				messages,
 				tools,
 				maxSteps: 5,

@@ -114,11 +114,6 @@ function WalletTransactionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button size="sm" className="rounded-sm">
-          Show details
-        </Button>
-      </DialogTrigger>
       <DialogContent className="max-w-md p-6 bg-background text-foreground">
         <DialogHeader>
           <DialogTitle>Transaction Details</DialogTitle>

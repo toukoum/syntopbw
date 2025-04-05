@@ -6,10 +6,10 @@ import AgentTools from "@/components/agent/agent-tools";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateUUID } from "@/lib/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { MessageSquare, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { CustomWalletButton } from "@/components/solana/customwalletbutton";
 
 export default function AgentPage() {
   const [activeTab, setActiveTab] = useState("tools");
@@ -60,7 +60,7 @@ export default function AgentPage() {
             Please connect your wallet to access your agent.
           </p>
           <div className="mt-6">
-            <WalletMultiButton />
+            <CustomWalletButton />
           </div>
         </div>
       </div>
@@ -82,14 +82,14 @@ export default function AgentPage() {
               <Sparkles className="h-4 w-4" />
               Agent
             </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
+            <TabsTrigger value="chat" className="flex h-full items-center gap-2">
               <MessageSquare className="h-4 w-4" />
               Chat
             </TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="hide md:block" >
-          <WalletMultiButton />
+          <CustomWalletButton />
         </div>
       </div>
 

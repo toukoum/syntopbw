@@ -59,7 +59,7 @@ export default function CardList() {
   };
 
   return (
-    <div className="w-full max-w-4xl px-4 mt-3">
+    <div className="w-full max-w-4xl md:px-4 mt-3">
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {suggestionItems.map((item, index) => (

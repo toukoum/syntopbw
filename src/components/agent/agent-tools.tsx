@@ -49,7 +49,6 @@ export default function AgentTools({ walletAddress }: { walletAddress: string })
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
-  const [showEnabledOnly, setShowEnabledOnly] = useState(false);
 
   const { connection } = useConnection();
   const { publicKey } = useWallet();
@@ -99,10 +98,6 @@ export default function AgentTools({ walletAddress }: { walletAddress: string })
       );
     }
 
-    if (showEnabledOnly) {
-      result = result.filter(tool => tool.enabled);
-    }
-
     // Then sort
     switch (sortBy) {
       case "name-asc":
@@ -121,7 +116,7 @@ export default function AgentTools({ walletAddress }: { walletAddress: string })
       default:
         return result;
     }
-  }, [tools, searchQuery, sortBy, showEnabledOnly]);
+  }, [tools, searchQuery, sortBy]);
 
   return (
     <div>
@@ -152,7 +147,7 @@ export default function AgentTools({ walletAddress }: { walletAddress: string })
                 <li>Connecting to external APIs and services</li>
               </ul>
               <p className="text-sm text-muted-foreground mt-4">
-                You can enable or disable tools, purchase new ones from the marketplace, or create your own custom tools to extend your agent's functionality.
+                You can enable or disable tools based on your needs.
               </p>
             </div>
             <DialogFooter>
@@ -204,15 +199,6 @@ export default function AgentTools({ walletAddress }: { walletAddress: string })
               </Select>
             </div>
 
-            {/* Show enabled only toggle */}
-            <div className="flex items-center justify-end space-x-2">
-              <Label htmlFor="enabled-filter" className="cursor-pointer">Show enabled only</Label>
-              <Switch
-                id="enabled-filter"
-                checked={showEnabledOnly}
-                onCheckedChange={setShowEnabledOnly}
-              />
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -231,7 +217,7 @@ export default function AgentTools({ walletAddress }: { walletAddress: string })
         ) : (
           <>
             {filteredAndSortedTools.length === 0 ? (
-              searchQuery || showEnabledOnly ? (
+              searchQuery ? (
                 <div className="text-center py-10 border rounded-lg">
                   <h3 className="text-lg font-medium mb-2">No Matching Tools</h3>
                   <p className="text-muted-foreground mb-6">
@@ -239,7 +225,6 @@ export default function AgentTools({ walletAddress }: { walletAddress: string })
                   </p>
                   <Button variant="outline" onClick={() => {
                     setSearchQuery("");
-                    setShowEnabledOnly(false);
                   }}>
                     Clear Filters
                   </Button>

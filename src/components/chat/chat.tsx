@@ -67,6 +67,8 @@ export default function Chat({ initialMessages, id }: ChatProps) {
   const isLocal = useChatStore((state) => state.isLocal);
   const router = useRouter();
 
+  let isNewChat = messages.length === 0;
+
   // Check if any wallet tool is in progress
   const isToolInProgress = useCallback(() => {
     return messages.some(
@@ -125,17 +127,18 @@ export default function Chat({ initialMessages, id }: ChatProps) {
 
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="sticky top-0 z-10">
+      <div className="sticky top-0">
         <ChatTopbar
           isLoading={isLoading}
           chatId={id}
           messages={messages}
           setMessages={setMessages}
+          isNewChat={isNewChat}
         />
       </div>
 
-      {messages.length === 0 ? (
-        <div className="flex flex-col h-full w-full items-center justify-center p-6 max-w-5xl mx-auto">
+      {isNewChat ? (
+        <div className="flex flex-col h-full w-full items-center justify-center md:p-6 md:max-w-5xl mx-auto">
           <div className="w-full flex flex-col items-center mb-8">
             <div className="relative">
               <div className="absolute -z-10 inset-0 rounded-full bg-primary/10 blur-3xl opacity-20 animate-pulse"></div>
@@ -150,7 +153,7 @@ export default function Chat({ initialMessages, id }: ChatProps) {
             <h2 className="text-2xl font-bold mt-6 mb-2">Synto Agent</h2>
           </div>
 
-          <div className="w-full px-4 md:px-12 max-w-3xl mx-auto">
+          <div className="w-full md:px-12 max-w-3xl mx-auto">
             <ChatBottombar
               input={input}
               handleInputChange={handleInputChange}
@@ -163,7 +166,7 @@ export default function Chat({ initialMessages, id }: ChatProps) {
             />
           </div>
 
-          <div className="mt-10 w-full">
+          <div className="mt-10 w-full overflow-y-auto overflow-visible hidden md:block">
             <CardList />
           </div>
         </div>
@@ -189,7 +192,7 @@ export default function Chat({ initialMessages, id }: ChatProps) {
               addToolResult={addToolResult}
             />
           </div>
-          <div className="w-full max-w-4xl mx-auto ">
+          <div className="w-full max-w-3xl mx-auto ">
             <ChatBottombar
               input={input}
               handleInputChange={handleInputChange}

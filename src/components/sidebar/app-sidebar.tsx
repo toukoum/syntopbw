@@ -98,7 +98,7 @@ export function AppSidebar() {
   return (
     <>
       {/* Mobile sidebar toggle button - Only visible on mobile */}
-      {isMobile && (
+      {/*{isMobile && (
         <button
           className="fixed z-50 bottom-4 rounded-lg right-6 p-3 bg-primary text-primary-foreground shadow-lg md:hidden"
           onClick={toggleSidebar}
@@ -106,7 +106,7 @@ export function AppSidebar() {
         >
           <MessageSquare className="h-5 w-5" />
         </button>
-      )}
+      )}*/}
 
       <Sidebar
         collapsible="icon"
