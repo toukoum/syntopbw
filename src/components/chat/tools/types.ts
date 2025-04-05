@@ -63,6 +63,7 @@ export const TOOL_REGISTRY: Record<string, ToolCategory> = {
   
   // Utility tools
   'checkPortfolio':ToolCategory.UTILITY,
+  'checkTokenBalance':ToolCategory.UTILITY,
   'getweather': ToolCategory.UTILITY,
   'getlocation': ToolCategory.UTILITY,
   

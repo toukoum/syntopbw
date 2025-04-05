@@ -9,86 +9,87 @@ import { swap } from "./tools/swap";
 //import { get } from "lodash";
 import { getLocation } from "./tools/getLocation";
 import { getWeather } from "./tools/getWeather";
-import { SYSTEM_PROMPT }  from "./prompt";
+import { SYSTEM_PROMPT } from "./prompt";
 
 import { loadDynamicTools } from "./util/toolManagers";
 import { addContact, getContact } from "./tools/contact";
 import { fetchTwitterDescription } from "./tools/fetchTwitterDescription";
 import { checkPortfolio } from "./tools/checkPortfolio";
+import { checkBalance } from "./tools/checkBalance";
 
 export const maxDuration = 30;
 
 const LOCAL_MODELS = {
-	"llama": "llama3.1:latest",
-	"mistral": "mistral:latest",
-	"deepseek": "deepseek-r1:8b",
-}
-
+  llama: "llama3.1:latest",
+  mistral: "mistral:latest",
+  deepseek: "deepseek-r1:8b",
+};
 
 const selectedLocalModel = LOCAL_MODELS["llama"];
 
 export async function POST(req: Request) {
-	try {
-		const { messages, isLocal } = await req.json();
-		console.log("[CHAT-API] Incoming messages:", messages);
-		console.log('isLocal:', isLocal);
-		
-		messages.unshift(SYSTEM_PROMPT);
+  try {
+    const { messages, isLocal } = await req.json();
+    console.log("[CHAT-API] Incoming messages:", messages);
+    console.log("isLocal:", isLocal);
 
-		const staticTools = {
-			//convert,
-			send,
-			swap,
-			checkPortfolio,
-			getLocation,
-			getWeather,
+    messages.unshift(SYSTEM_PROMPT);
+
+    const staticTools = {
+      //convert,
+      send,
+      swap,
+      checkPortfolio,
+      checkBalance,
+      getLocation,
+      getWeather,
       addContact,
       getContact,
-	  fetchTwitterDescription,
-		};
+      fetchTwitterDescription,
+    };
 
-		// Load dynamic tools from localStorage
-		//const dynamicTools = loadDynamicTools();
+    // Load dynamic tools from localStorage
+    //const dynamicTools = loadDynamicTools();
 
-		// Merge static and dynamic tools
-		const tools = {
-			...staticTools,
-			//...dynamicTools
-		};
+    // Merge static and dynamic tools
+    const tools = {
+      ...staticTools,
+      //...dynamicTools
+    };
 
-		// Log available tools for debugging
-		console.log("Available tools:", Object.keys(tools));
+    // Log available tools for debugging
+    console.log("Available tools:", Object.keys(tools));
 
+    let result;
 
+    if (!isLocal) {
+      result = streamText({
+        model: openai("gpt-4o"),
+        messages,
+        tools,
+        maxSteps: 5,
+      });
+    } else {
+      const ollama = createOllama({ baseURL: process.env.OLLAMA_URL + "/api" });
+      result = streamText({
+        model: ollama(selectedLocalModel, { simulateStreaming: true }),
+        messages,
+        tools,
+        maxSteps: 5,
+      });
+    }
 
-
-		let result;
-
-		if (!isLocal) {
-			result = streamText({
-				model: openai("gpt-4o"),
-				messages,
-				tools,
-				maxSteps: 5,
-			});
-		} else {
-			const ollama = createOllama({ baseURL: process.env.OLLAMA_URL + "/api" });
-			result = streamText({
-				model: ollama(selectedLocalModel, { simulateStreaming: true }),
-				messages,
-				tools,
-				maxSteps: 5,
-			});
-		}
-
-		return result.toDataStreamResponse({
-			getErrorMessage: (error) => {
-				console.error("ERREUR AVEC LE STREAMING DE LA RESPONSE API CALL:", error);
-				return "An error occurred during the API call.";
-			},
-		});
-	} catch (err) {
-		console.error("ERREUR PLUS GLOBALE", err);
-		return new Response("Internal Server Error", { status: 500 });
-	}
+    return result.toDataStreamResponse({
+      getErrorMessage: (error) => {
+        console.error(
+          "ERREUR AVEC LE STREAMING DE LA RESPONSE API CALL:",
+          error
+        );
+        return "An error occurred during the API call.";
+      },
+    });
+  } catch (err) {
+    console.error("ERREUR PLUS GLOBALE", err);
+    return new Response("Internal Server Error", { status: 500 });
+  }
 }

@@ -115,9 +115,6 @@ export async function BuildSwapInstruction(
   const quoteResponse = await (
     await fetch(
       `https://ultra-api.jup.ag/order?inputMint=${input}&outputMint=${output}&amount=${amount}&taker=${userAddress}`
-      // `https://api.jup.ag/swap/v1/quote?inputMint=${input}&outputMint=${output}&amount=${
-      //   amount * LAMPORTS_PER_SOL
-      // }&slippageBps=50&restrictIntermediateTokens=true`
     )
   ).json();
 
