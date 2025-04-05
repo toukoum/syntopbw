@@ -60,15 +60,16 @@ export const TOOL_REGISTRY: Record<string, ToolCategory> = {
   'bridge': ToolCategory.WALLET,
   'stake': ToolCategory.WALLET,
   'convert': ToolCategory.WALLET,
-  
+  'copyportfolio': ToolCategory.WALLET,
+
   // Utility tools
   'getweather': ToolCategory.UTILITY,
   'getlocation': ToolCategory.UTILITY,
-  
+
   // Social tools - Add our new contact tools here
   'addcontact': ToolCategory.SOCIAL,
   'getcontact': ToolCategory.SOCIAL,
-  
+
   // Data tools
   'visualizedata': ToolCategory.DATA,
   'generatechart': ToolCategory.DATA

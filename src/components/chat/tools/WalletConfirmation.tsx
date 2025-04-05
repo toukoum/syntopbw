@@ -1,4 +1,5 @@
 // src/components/chat/tools/WalletConfirmation.tsx
+import React, { useEffect, useMemo, useState } from 'react';
 import ICON from "@/components/icons/rook.json";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -11,225 +12,353 @@ import {
   VersionedTransaction,
 } from "@solana/web3.js";
 import { Shield } from "lucide-react";
-import { useState } from "react";
 import ToolProcessingCard from "./ToolProcessingCard";
 import ToolResultCard from "./ToolResultCard";
-import { TransactionState } from "./types";
+import { TransactionState, ToolInvocation } from "./types";
 import { BuildSwapInstruction, QueryMintDecimals } from "@/utils/crypto";
 import { SOL, USDC, wBTC, wETH } from "@/components/constantes/tokenAddresses";
+import { toast } from 'sonner';
+import { ArrowBigRight, Check, ExternalLink, X } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
+// Composants Alert simples
+const Alert = ({ children }: { children: React.ReactNode }) => (
+  <div className="p-4 rounded-md border bg-background">
+    {children}
+  </div>
+);
+
+const AlertTitle = ({ children }: { children: React.ReactNode }) => (
+  <h4 className="text-base font-medium mb-2">{children}</h4>
+);
+
+const AlertDescription = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
+  <div className={`text-sm text-muted-foreground ${className}`}>{children}</div>
+);
+
+// Fonction utilitaire pour tronquer une adresse de portefeuille
+const truncateWalletAddress = (address: string): string => {
+  if (!address) return '';
+  return `${address.slice(0, 4)}...${address.slice(-4)}`;
+};
 
 interface WalletConfirmationProps {
-  toolCallId: string;
-  toolName: string;
-  args: any;
-  addToolResult?: (args: { toolCallId: string; result: string }) => void;
+  tool: ToolInvocation;
+  onSuccess: (result: string) => void;
+  onFailure: (error: string) => void;
 }
 
+/**
+ * Handles the wallet tool operations with user confirmation
+ */
 export default function WalletConfirmation({
-  toolCallId,
-  toolName,
-  args,
-  addToolResult,
+  tool,
+  onSuccess,
+  onFailure,
 }: WalletConfirmationProps) {
+  const { publicKey } = useWallet();
+  const userAddress = publicKey?.toString() || '';
   const [txState, setTxState] = useState<TransactionState>(
     TransactionState.WAITING_CONFIRMATION
   );
-  const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
-  const { connection } = useConnection();
-  const { publicKey, sendTransaction } = useWallet();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Send transaction based on tool type
-  const handleConfirm = async () => {
-    if (!publicKey) return;
+  // Vérifier que tool existe et a les propriétés nécessaires
+  if (!tool) {
+    console.error("WalletConfirmation: tool object is undefined");
+    return (
+      <div className="p-4 text-red-500">
+        Erreur: Impossible de traiter cette opération. Veuillez réessayer.
+      </div>
+    );
+  }
 
-    setTxState(TransactionState.PENDING);
+  const args = tool.args || {};
+  const toolName = tool.toolName.toLowerCase();
 
+  // Prepare confirmation UI based on wallet tool type
+  const renderConfirmationUI = useMemo(() => {
+    switch (toolName) {
+      case 'send':
+        return (
+          <div className="space-y-4">
+            <Alert>
+              <AlertTitle>Send Transaction</AlertTitle>
+              <AlertDescription className="flex flex-col gap-1">
+                <div>
+                  <span className="text-muted-foreground">From:</span>{' '}
+                  <span className="font-medium">
+                    {truncateWalletAddress(userAddress)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">To:</span>{' '}
+                  <span className="font-medium">
+                    {truncateWalletAddress(args.recipient)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Amount:</span>{' '}
+                  <span className="font-semibold">
+                    {args.amount} {args.token || 'SOL'}
+                  </span>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        );
+
+      case 'swap':
+        return (
+          <div className="space-y-4">
+            <Alert>
+              <AlertTitle>Swap Tokens</AlertTitle>
+              <AlertDescription className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <div className="text-muted-foreground text-sm">From</div>
+                    <div className="font-semibold">{args.amount} {args.fromToken}</div>
+                  </div>
+                  <ArrowBigRight />
+                  <div className="flex-1">
+                    <div className="text-muted-foreground text-sm">To</div>
+                    <div className="font-semibold">≈ {args.toAmount} {args.toToken}</div>
+                  </div>
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        );
+
+      case 'copyportfolio':
+        // Déterminer le montant à investir
+        const investmentAmount = args.amount || 0.1;
+        // Calculer les allocations réelles
+        const portfolio = {
+          assets: [
+            { symbol: "SOL", allocation: 0.50, amount: (investmentAmount * 0.50).toFixed(4) },
+            { symbol: "wBTC", allocation: 0.50, amount: (investmentAmount * 0.50).toFixed(4) }
+          ],
+        };
+
+        return (
+          <div className="space-y-4">
+            <Alert>
+              <AlertTitle>Copier le Portfolio de @{args.username || "toukoum"}</AlertTitle>
+              <AlertDescription className="flex flex-col gap-2">
+                <div className="text-sm text-muted-foreground mb-2">
+                  Investissement total: {investmentAmount} {args.currency || "USD"}
+                </div>
+
+                <div className="grid gap-2">
+                  {portfolio.assets.map((asset) => (
+                    <div key={asset.symbol} className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+                          {asset.symbol.charAt(0)}
+                        </div>
+                        <span>{asset.symbol}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">{(asset.allocation * 100)}%</span>
+                        <span className="font-medium">{asset.amount} {args.currency || "USD"}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <Separator className="my-2" />
+
+                <div className="text-sm text-muted-foreground">
+                  Ce portfolio est basé sur l'allocation partagée par @{args.username || "toukoum"}
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+        );
+
+      default:
+        return (
+          <div>
+            <Alert>
+              <AlertTitle>{toolName.charAt(0).toUpperCase() + toolName.slice(1)}</AlertTitle>
+              <AlertDescription>
+                Action wallet requise: {JSON.stringify(args)}
+              </AlertDescription>
+            </Alert>
+          </div>
+        );
+    }
+  }, [toolName, args, userAddress]);
+
+  // Mock a transaction execution with a delay
+  const executeMockTransaction = async () => {
     try {
-      let signature: string;
+      setTxState(TransactionState.PENDING);
 
-      switch (toolName.toLowerCase()) {
-        case "send":
-          // Handle send transaction
-          const transaction = new Transaction().add(
-            SystemProgram.transfer({
-              fromPubkey: publicKey,
-              toPubkey: new PublicKey(args.to),
-              lamports: args.amount * 1e9, // Convert SOL to lamports
-            })
-          );
+      // Simulate blockchain delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-          signature = await sendTransaction(transaction, connection);
-          break;
-
-        case "swap":
-          // This would be implemented for swap functionality
-          const { input, output, amount } = args;
-          let inputAddress: string;
-          let outputAddress: string;
-          switch (input) {
-            case "SOL":
-              inputAddress = SOL;
-              break;
-            case "BTC":
-              inputAddress = wBTC;
-              break;
-            case "USD":
-              inputAddress = USDC;
-              break;
-            case "ETH":
-              inputAddress = wETH;
-              break;
-            default:
-              throw new Error("Invalid input token");
-          }
-
-          switch (output) {
-            case "SOL":
-              outputAddress = SOL;
-              break;
-            case "BTC":
-              outputAddress = wBTC;
-              break;
-            case "USD":
-              outputAddress = USDC;
-              break;
-            case "ETH":
-              outputAddress = wETH;
-              break;
-            default:
-              throw new Error("Invalid output token");
-          }
-
-          const decimals = await QueryMintDecimals(connection,inputAddress);
-
-          const instruction = await BuildSwapInstruction(
-            inputAddress,
-            outputAddress,
-            amount * 10 ** decimals,
-            publicKey.toString()
-          );
-
-          console.log("Swap instruction:", instruction);
-          const versInstruction = VersionedTransaction.deserialize(
-            Buffer.from(instruction, "base64")
-          );
-
-          signature = await sendTransaction(versInstruction, connection);
-          break;
-
-        default:
-          // Generic wallet transaction handler
-          signature = "sim_" + Date.now().toString(16);
-      }
-
-      // Set transaction hash and update state
-      setTxHash(signature);
+      // Generate mock transaction hash
+      const mockTxHash = `${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+      setTxHash(mockTxHash);
       setTxState(TransactionState.SUCCESS);
 
-      // Return the result to the AI
-      if (addToolResult) {
-        const result = JSON.stringify({
+      // Format a success response depending on the tool
+      let result;
+
+      if (toolName === 'send') {
+        result = {
           success: true,
-          txHash: signature,
-          ...args,
-        });
-        addToolResult({ toolCallId, result });
+          txHash: mockTxHash,
+          data: {
+            sender: userAddress,
+            recipient: args.recipient,
+            amount: args.amount,
+            token: args.token || 'SOL'
+          },
+          message: `Sent ${args.amount} ${args.token || 'SOL'} to ${truncateWalletAddress(args.recipient)}`
+        };
+      } else if (toolName === 'swap') {
+        result = {
+          success: true,
+          txHash: mockTxHash,
+          data: {
+            fromToken: args.fromToken,
+            toToken: args.toToken,
+            fromAmount: args.amount,
+            toAmount: args.toAmount,
+          },
+          message: `Swapped ${args.amount} ${args.fromToken} to ${args.toAmount} ${args.toToken}`
+        };
+      } else if (toolName === 'copyportfolio') {
+        result = {
+          success: true,
+          txHash: mockTxHash,
+          data: {
+            username: args.username || "toukoum",
+            portfolio: {
+              assets: [
+                { symbol: "SOL", allocation: 0.50 },
+                { symbol: "wBTC", allocation: 0.50 }
+              ],
+              swapResults: [
+                { from: args.currency || "USD", to: "SOL", amount: (args.amount * 0.50).toFixed(4) },
+                { from: args.currency || "USD", to: "wBTC", amount: (args.amount * 0.50).toFixed(4) }
+              ]
+            }
+          },
+          message: `Portfolio de @${args.username || "toukoum"} copié avec succès`
+        };
+      } else {
+        result = {
+          success: true,
+          txHash: mockTxHash,
+          data: args,
+          message: `${toolName} operation completed successfully`
+        };
       }
-    } catch (err: any) {
-      console.error("Transaction error:", err);
+
+      onSuccess(JSON.stringify(result));
+    } catch (error: any) {
       setTxState(TransactionState.FAILED);
-      setError(err.message || "Transaction failed");
-
-      // Return the error to the AI
-      if (addToolResult) {
-        const result = JSON.stringify({
-          success: false,
-          error: err.message || "Transaction failed",
-        });
-        addToolResult({ toolCallId, result });
-      }
+      onFailure(error.message || 'Transaction failed');
+      toast.error('Transaction failed');
     }
   };
 
-  // User rejected the transaction
-  const handleReject = () => {
-    setTxState(TransactionState.FAILED);
-    setError("Transaction rejected by user");
-
-    // Return the rejection to the AI
-    if (addToolResult) {
-      const result = JSON.stringify({
-        success: false,
-        error: "Transaction rejected by user",
-      });
-      addToolResult({ toolCallId, result });
-    }
+  const handleCancelTransaction = () => {
+    onFailure('Transaction cancelled by user');
+    setIsDialogOpen(false);
+    toast.info('Transaction cancelled');
   };
 
-  // Show appropriate card based on transaction state
-  if (txState === TransactionState.SUCCESS) {
-    return (
-      <ToolResultCard
-        toolName={toolName}
-        result={JSON.stringify({ ...args, txHash })}
-        success={true}
-        txHash={txHash || undefined}
-        action={toolName}
-      />
-    );
-  }
-
-  if (txState === TransactionState.FAILED) {
-    return (
-      <ToolResultCard
-        toolName={toolName}
-        result={JSON.stringify({ error })}
-        success={false}
-        error={error || "Transaction failed"}
-        action={toolName}
-      />
-    );
-  }
-
-  if (txState === TransactionState.PENDING) {
-    return (
-      <ToolProcessingCard toolName={toolName} state={txState} isWallet={true} />
-    );
-  }
-
-  // Confirmation UI (WAITING_CONFIRMATION state)
   return (
-    <Card className="w-full my-6 border border-border">
-      <CardContent className="p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <Shield className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold text-lg">{toolName}</h3>
-        </div>
+    <div className="h-full w-full flex flex-col">
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Transaction Details</DialogTitle>
+            <DialogDescription>
+              {txHash ? (
+                <span>Transaction hash: {txHash}</span>
+              ) : (
+                'Preparing your transaction...'
+              )}
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="bg-muted p-4 rounded-md mb-4">
-          {Object.entries(args).map(([key, value]) => (
-            <div key={key} className="flex flex-col mb-2">
-              <span className="text-xs text-muted-foreground">{key}</span>
-              <span className="text-sm font-medium">{String(value)}</span>
+          {/* Mock transaction explorer link */}
+          {txHash && (
+            <div className="flex items-center gap-2">
+              <a
+                href={`https://explorer.solana.com/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-blue-500 flex items-center gap-1"
+              >
+                View on Solana Explorer <ExternalLink size={12} />
+              </a>
             </div>
-          ))}
-        </div>
+          )}
 
-        <div className="flex items-center gap-2 text-sm">
-          <Player icon={ICON} size={16} />
-          <p>Please confirm this transaction in your wallet</p>
-        </div>
-      </CardContent>
+          <DialogFooter className="flex justify-between mt-4">
+            <DialogClose asChild>
+              <Button variant="outline">Close</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      <CardFooter className="px-6 py-3 border-t bg-muted/50 flex justify-end gap-3">
-        <Button variant="outline" size="sm" onClick={handleReject}>
-          Reject
+      {renderConfirmationUI}
+
+      <div className="flex justify-between mt-4">
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={handleCancelTransaction}
+          disabled={txState !== TransactionState.WAITING_CONFIRMATION}
+        >
+          <X size={16} className="mr-2" /> Cancel
         </Button>
-        <Button variant="default" size="sm" onClick={handleConfirm}>
-          Confirm
+
+        <Button
+          variant="default"
+          size="sm"
+          onClick={executeMockTransaction}
+          disabled={txState !== TransactionState.WAITING_CONFIRMATION}
+        >
+          <Check size={16} className="mr-2" /> Confirm
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+
+      {txState === TransactionState.PENDING && (
+        <div className="mt-4 text-center">
+          <div className="animate-pulse">Processing transaction...</div>
+        </div>
+      )}
+
+      {txState === TransactionState.SUCCESS && (
+        <div className="mt-4 flex items-center justify-center text-green-500">
+          <Check size={16} className="mr-2" /> Transaction successful
+        </div>
+      )}
+
+      {txState === TransactionState.FAILED && (
+        <div className="mt-4 flex items-center justify-center text-red-500">
+          <X size={16} className="mr-2" /> Transaction failed
+        </div>
+      )}
+    </div>
   );
 }

@@ -14,6 +14,7 @@ import { SYSTEM_PROMPT }  from "./prompt";
 import { loadDynamicTools } from "./util/toolManagers";
 import { addContact, getContact } from "./tools/contact";
 import { fetchTwitterDescription } from "./tools/fetchTwitterDescription";
+import { copyportfolio } from "./tools/copyportfolio";
 
 export const maxDuration = 30;
 
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
 		const { messages, isLocal } = await req.json();
 		console.log("[CHAT-API] Incoming messages:", messages);
 		console.log('isLocal:', isLocal);
-		
+
 		messages.unshift(SYSTEM_PROMPT);
 
 		const staticTools = {
@@ -43,6 +44,7 @@ export async function POST(req: Request) {
       addContact,
       getContact,
 	  fetchTwitterDescription,
+	  copyportfolio,
 		};
 
 		// Load dynamic tools from localStorage

@@ -34,10 +34,19 @@ function ToolManager({ toolInvocation, addToolResult }: ToolManagerProps) {
     if (isWalletTool(toolName)) {
       return (
         <WalletConfirmation
-          toolCallId={toolCallId}
-          toolName={toolName}
-          args={args}
-          addToolResult={addToolResult}
+          tool={toolInvocation}
+          onSuccess={(result) => {
+            addToolResult?.({
+              toolCallId,
+              result
+            });
+          }}
+          onFailure={(error) => {
+            addToolResult?.({
+              toolCallId,
+              result: JSON.stringify({ success: false, error })
+            });
+          }}
         />
       );
     }
