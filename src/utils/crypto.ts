@@ -7,6 +7,8 @@
 //import { Wallet } from "@solana/wallet-adapter-react";
 //import { NFTAsset } from "@/types/nft";
 
+import { PublicKey } from "@solana/web3.js";
+
 //// Type for the MintPay program
 //interface MintPay {
 //  programId: PublicKey;
@@ -32,9 +34,9 @@
 //    const provider = new AnchorProvider(connection, wallet, {
 //      commitment: "confirmed",
 //    });
-    
+
 //    const program = new Program(idlMintPay as MintPay, provider);
-    
+
 //    const [collectionAccount] = PublicKey.findProgramAddressSync(
 //      [Buffer.from("collection")],
 //      program.programId
@@ -42,9 +44,9 @@
 
 //    const collectionData = await program.account.collection.fetch(collectionAccount);
 //    const collectionAddress = collectionData.collectionAddress;
-    
+
 //    const collection = await fetchAssetsByCollection(
-//      createUmi(connection), 
+//      createUmi(connection),
 //      collectionAddress
 //    );
 
@@ -101,3 +103,45 @@
 //    return [];
 //  }
 //}
+
+export async function BuildSwapInstruction(
+  input: string,
+  output: string,
+  amount: number
+): Promise<string> {
+  const quoteResponse = await (
+    await fetch(
+      `https://api.jup.ag/swap/v1/quote?inputMint=${input}&outputMint=${output}&amount=${amount}&slippageBps=50&restrictIntermediateTokens=true`
+    )
+  ).json();
+
+  //   console.log(JSON.stringify(quoteResponse, null, 2));
+
+  const swapResponse = await (
+    await fetch("https://api.jup.ag/swap/v1/swap", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // 'x-api-key': '' // enter api key here
+      },
+      body: JSON.stringify({
+        quoteResponse,
+        userPublicKey: "Z9ckPtZS6RtBLJVnMfDzj71mJvFupunAjirNF6H9wgJ",
+
+        // ADDITIONAL PARAMETERS TO OPTIMIZE FOR TRANSACTION LANDING
+        // See next guide to optimize for transaction landing
+        dynamicComputeUnitLimit: true,
+        dynamicSlippage: true,
+        prioritizationFeeLamports: {
+          priorityLevelWithMaxLamports: {
+            maxLamports: 1000000,
+            priorityLevel: "veryHigh",
+          },
+        },
+      }),
+    })
+  ).json();
+
+  console.log(swapResponse);
+  return swapResponse.swapTransaction;
+}
