@@ -6,7 +6,7 @@
 //import { Connection } from "@solana/web3.js";
 //import { Wallet } from "@solana/wallet-adapter-react";
 //import { NFTAsset } from "@/types/nft";
-import { getMint, MintLayout } from "@solana/spl-token";
+import { getMint } from "@solana/spl-token";
 import { Connection, PublicKey } from "@solana/web3.js";
 
 //// Type for the MintPay program
@@ -34,9 +34,9 @@ import { Connection, PublicKey } from "@solana/web3.js";
 //    const provider = new AnchorProvider(connection, wallet, {
 //      commitment: "confirmed",
 //    });
-
+    
 //    const program = new Program(idlMintPay as MintPay, provider);
-
+    
 //    const [collectionAccount] = PublicKey.findProgramAddressSync(
 //      [Buffer.from("collection")],
 //      program.programId
@@ -44,9 +44,9 @@ import { Connection, PublicKey } from "@solana/web3.js";
 
 //    const collectionData = await program.account.collection.fetch(collectionAccount);
 //    const collectionAddress = collectionData.collectionAddress;
-
+    
 //    const collection = await fetchAssetsByCollection(
-//      createUmi(connection),
+//      createUmi(connection), 
 //      collectionAddress
 //    );
 
@@ -127,9 +127,7 @@ export async function QueryMintDecimals(
   connection: Connection,
   mintAddress: string
 ): Promise<number> {
-  connection = new Connection(
-    "https://stylish-blue-butterfly.solana-mainnet.quiknode.pro/a9f23e5699089b9232dca4ef43b088bc1e1ad0d4/"
-  );
+  connection = new Connection(process.env.RPC ?? "");
   console.log({ mintAddress });
   const { decimals } = await getMint(connection, new PublicKey(mintAddress));
   return decimals;
