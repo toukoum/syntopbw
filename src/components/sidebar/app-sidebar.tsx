@@ -101,11 +101,11 @@ export function AppSidebar() {
       {/* Mobile sidebar toggle button - Only visible on mobile */}
       {isMobile && (
         <button
-          className="fixed z-50 bottom-4 right-4 p-3 bg-primary text-primary-foreground shadow-lg md:hidden"
+          className="fixed z-50 bottom-4 rounded-lg right-6 p-3 bg-primary text-primary-foreground shadow-lg md:hidden"
           onClick={toggleSidebar}
           aria-label="Toggle sidebar"
         >
-          <Menu className="h-6 w-6" />
+          <MessageSquare className="h-5 w-5" />
         </button>
       )}
 

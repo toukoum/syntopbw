@@ -63,7 +63,7 @@ export default function AgentProfile({ walletAddress }: { walletAddress: string 
 
           <div className="flex flex-col text-center md:text-left">
             <h1 className="text-2xl font-bold">
-              {loading ? <Skeleton className="h-8 w-48" /> : "Agent"}
+              {loading ? <Skeleton className="h-8 w-48" /> : "Synto"}
             </h1>
 
             <div className="text-muted-foreground mt-2 max-w-md">
