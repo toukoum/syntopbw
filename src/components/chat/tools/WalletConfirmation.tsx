@@ -1,9 +1,9 @@
 // src/components/chat/tools/WalletConfirmation.tsx
 import {
+  BTC,
   META,
   SOL,
   USDC,
-  wBTC,
   wETH,
 } from "@/components/constantes/tokenAddresses";
 import ICON from "@/components/icons/rook.json";
@@ -78,7 +78,7 @@ export default function WalletConfirmation({
               inputAddress = SOL;
               break;
             case "BTC":
-              inputAddress = wBTC;
+              inputAddress = BTC;
               break;
             case "USDC":
               inputAddress = USDC;
@@ -98,7 +98,7 @@ export default function WalletConfirmation({
               outputAddress = SOL;
               break;
             case "BTC":
-              outputAddress = wBTC;
+              outputAddress = BTC;
               break;
             case "USDC":
               outputAddress = USDC;

@@ -1,7 +1,7 @@
-import { FetchBalances } from "@/utils/crypto";
-import { isWalletTool } from "./types";
-import { PublicKey } from "@solana/web3.js";
 import { addressesToken } from "@/components/constantes/tokenAddresses";
+import { FetchBalances } from "@/utils/crypto";
+import { PublicKey } from "@solana/web3.js";
+import { isWalletTool } from "./types";
 // List of wallet tools that should be handled by UI
 
 /**
@@ -189,7 +189,7 @@ const handleFetchTwitterDescriptionTool = async (
       New Allocation:
 
       • 50% SOL
-      • 50% wBTC
+      • 50% BTC
 
       Still waiting for either a BTC retest of 68-70k or a Fed pivot
 
