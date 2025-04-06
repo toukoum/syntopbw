@@ -7,9 +7,9 @@ const API_KEY = process.env.CRYPTOCOMPARE_API_KEY;
 export const convert = tool({
 	description: "Convert an amount of cryptocurrency from one currency to another.",
 	parameters: z.object({
-		amount: z.number().positive().describe("Amount to convert."),
+		amount: z.number().describe("Amount to convert."),
 		fromCurrency: z.string().describe("Currency code to convert from (e.g. BTC)."),
-		toCurrency: z.string().describe("Currency code to convert to (e.g. USD)."),
+		toCurrency: z.string().describe("Currency code to convert to (e.g. USDC)."),
 	}),
 	execute: async ({ amount, fromCurrency, toCurrency }) => {
 		try {

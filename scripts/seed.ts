@@ -85,13 +85,13 @@ async function main() {
           {
             name: 'input',
             type: 'string',
-            description: 'Input token symbol (SOL, BTC, USD, ETH, META)',
+            description: 'Input token symbol (SOL, BTC, USDC, ETH, META)',
             required: true
           },
           {
             name: 'output',
             type: 'string',
-            description: 'Output token symbol (SOL, BTC, USD, ETH, META)',
+            description: 'Output token symbol (SOL, BTC, USDC, ETH, META)',
             required: true
           },
           {
@@ -260,7 +260,7 @@ async function main() {
           {
             name: 'address',
             type: 'string',
-            description: 'Token symbol (SOL, BTC, USD, ETH, META)',
+            description: 'Token symbol (SOL, BTC, USDC, ETH, META)',
             required: true
           }
         ]
@@ -358,13 +358,13 @@ async function main() {
           {
             name: 'fromCurrency',
             type: 'string',
-            description: 'Currency code to convert from (e.g. BTC, SOL, USD)',
+            description: 'Currency code to convert from (e.g. BTC, SOL, USDC)',
             required: true
           },
           {
             name: 'toCurrency',
             type: 'string',
-            description: 'Currency code to convert to (e.g. USD, BTC, SOL)',
+            description: 'Currency code to convert to (e.g. USDC, BTC, SOL)',
             required: true
           }
         ]

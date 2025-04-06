@@ -52,14 +52,14 @@ export async function POST(req: Request) {
 				model: openai("gpt-4o"),
 				messages,
 				tools,
-				maxSteps: 10,
+				maxSteps: 20,
 			});
 		} else {
 			result = streamText({
 				model: openai("gpt-4o"),
 				messages,
 				tools,
-				maxSteps: 10,
+				maxSteps: 20,
 			});
 		}
 

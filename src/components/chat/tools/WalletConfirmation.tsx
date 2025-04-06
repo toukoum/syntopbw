@@ -1,7 +1,15 @@
 // src/components/chat/tools/WalletConfirmation.tsx
+import {
+  META,
+  SOL,
+  USDC,
+  wBTC,
+  wETH,
+} from "@/components/constantes/tokenAddresses";
 import ICON from "@/components/icons/rook.json";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { BuildSwapInstruction, QueryMintDecimals } from "@/utils/crypto";
 import { Player } from "@lordicon/react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import {
@@ -15,14 +23,6 @@ import { useState } from "react";
 import ToolProcessingCard from "./ToolProcessingCard";
 import ToolResultCard from "./ToolResultCard";
 import { TransactionState } from "./types";
-import { BuildSwapInstruction, QueryMintDecimals } from "@/utils/crypto";
-import {
-  SOL,
-  USDC,
-  wBTC,
-  wETH,
-  META,
-} from "@/components/constantes/tokenAddresses";
 
 interface WalletConfirmationProps {
   toolCallId: string;
@@ -80,7 +80,7 @@ export default function WalletConfirmation({
             case "BTC":
               inputAddress = wBTC;
               break;
-            case "USD":
+            case "USDC":
               inputAddress = USDC;
               break;
             case "ETH":
@@ -100,7 +100,7 @@ export default function WalletConfirmation({
             case "BTC":
               outputAddress = wBTC;
               break;
-            case "USD":
+            case "USDC":
               outputAddress = USDC;
               break;
             case "ETH":

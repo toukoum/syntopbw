@@ -1,10 +1,10 @@
 "use client";
 
-import { toast } from "sonner";
-import { Copy, CreditCard, RefreshCw, DollarSign, Database } from "lucide-react";
-import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { Copy, CreditCard, Database, DollarSign, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "../ui/button";
 
 function copyToClipboard(text: string) {
   if (!text) return;
@@ -60,7 +60,7 @@ export default function CardList() {
 
   return (
     <div className="w-full max-w-4xl md:px-4 mt-3">
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {suggestionItems.map((item, index) => (
           <motion.div
@@ -85,17 +85,17 @@ export default function CardList() {
               )}>
                 {item.icon}
               </div>
-              
+
               <div className="flex-1">
                 <h4 className="font-medium mb-1 text-sm">
                   {item.text}
                 </h4>
-                
+
                 <p className="text-xs text-muted-foreground">
                   {item.description}
                 </p>
               </div>
-              
+
               <Button
                 onClick={(e) => {
                   e.stopPropagation();

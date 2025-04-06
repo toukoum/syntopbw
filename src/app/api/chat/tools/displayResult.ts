@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const displayresults = tool({
   description:
-    `Display a pie chart visualization of portfolio allocation or asset distribution. 
+    `WHEN USING THIS TOOL MAKE SURE THE CURRENCIES ARE DOLLARS (MAKE CONVERSION OTHERWISE)Display a pie chart visualization of portfolio allocation or asset distribution. 
      The data should represent asset categories and their values/percentages.
      
 Example:

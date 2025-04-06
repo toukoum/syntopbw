@@ -188,11 +188,8 @@ const handleFetchTwitterDescriptionTool = async (
       
       New Allocation:
 
-
       • 50% SOL
       • 50% wBTC
-
-      20% Stablecoins
 
       Still waiting for either a BTC retest of 68-70k or a Fed pivot
 

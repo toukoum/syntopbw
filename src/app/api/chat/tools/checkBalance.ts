@@ -6,7 +6,7 @@ export const checkBalance = tool({
     "Query the balance of a token of your connected wallet. Don't ask for confirmation before checking.",
   parameters: z.object({
     address: z
-      .enum(["SOL", "BTC", "USD", "ETH", "META"])
+      .enum(["SOL", "BTC", "USDC", "ETH", "META"])
       .describe("Input token address"),
   }),
 });
