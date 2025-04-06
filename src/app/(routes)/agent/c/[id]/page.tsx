@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { ChatLayout } from "@/components/chat/chat-layout";
 import useChatStore from "@/app/hooks/useChatStore";
+import { ChatLayout } from "@/components/chat/chat-layout";
+import { CustomWalletButton } from "@/components/solana/CustomWalletButton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { MessageSquare, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { CustomWalletButton } from "@/components/solana/customwalletbutton";
+import { useEffect } from "react";
 
 
 export default function ConversationPage({
@@ -17,7 +17,7 @@ export default function ConversationPage({
 }) {
   const { publicKey } = useWallet();
   const id = params.id;
-  
+
   const getChatById = useChatStore((state) => state.getChatById);
   const saveMessages = useChatStore((state) => state.saveMessages);
   const setCurrentChatId = useChatStore((state) => state.setCurrentChatId);
@@ -44,7 +44,7 @@ export default function ConversationPage({
             Please connect your wallet to chat with the agent.
           </p>
           <div className="mt-6">
-            <CustomWalletButton  />
+            <CustomWalletButton />
           </div>
         </div>
       </div>
@@ -69,7 +69,7 @@ export default function ConversationPage({
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        <CustomWalletButton/>
+        <CustomWalletButton />
       </div>
 
       {/* Chat Content */}

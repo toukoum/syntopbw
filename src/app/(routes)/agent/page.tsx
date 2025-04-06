@@ -3,13 +3,13 @@
 import useChatStore from "@/app/hooks/useChatStore";
 import AgentProfile from "@/components/agent/agent-profile";
 import AgentTools from "@/components/agent/agent-tools";
+import { CustomWalletButton } from "@/components/solana/CustomWalletButton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateUUID } from "@/lib/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { MessageSquare, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { CustomWalletButton } from "@/components/solana/customwalletbutton";
 
 export default function AgentPage() {
   const [activeTab, setActiveTab] = useState("tools");
