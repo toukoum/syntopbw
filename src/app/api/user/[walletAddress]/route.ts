@@ -1,6 +1,9 @@
 // src/app/api/user/[walletAddress]/route.ts
-import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
+
+// Add this line to mark the route as dynamic
+export const dynamic = 'force-dynamic';
 
 const prisma = new PrismaClient();
 
