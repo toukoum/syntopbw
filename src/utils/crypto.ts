@@ -111,14 +111,47 @@ export async function BuildSwapInstruction(
   amount: number,
   userAddress: string
 ): Promise<string> {
-  console.log({ amount });
-  const quoteResponse = await (
-    await fetch(
-      `https://ultra-api.jup.ag/order?inputMint=${input}&outputMint=${output}&amount=${amount}&taker=${userAddress}`
-    )
+  console.log({ amount, output, input, userAddress });
+
+  const queryURL = `https://quote-proxy.jup.ag/quote?inputMint=${input}&outputMint=${output}&amount=${amount}&slippageBps=5000&swapMode=ExactIn&onlyDirectRoutes=false&asLegacyTransaction=false&maxAccounts=64&computeAutoSlippage=true&minimizeSlippage=false&taker=${userAddress}`;
+
+  const quoteResponse = await (await fetch(queryURL)).json();
+  console.log("quoteResponse", quoteResponse);
+  const body = {
+    quoteResponse,
+    userPublicKey: userAddress,
+    wrapAndUnwrapSol: true,
+    dynamicComputeUnitLimit: true,
+    correctLastValidBlockHeight: true,
+    asLegacyTransaction: false,
+    allowOptimizedWrappedSolTokenAccount: true,
+    addConsensusAccount: true,
+    prioritizationFeeLamports: {
+      priorityLevelWithMaxLamports: {
+        maxLamports: 1000000,
+        global: false,
+        priorityLevel: "veryHigh",
+      },
+    },
+  };
+
+  console.log(body);
+
+  const swapBuild = await (
+    await fetch("https://quote-proxy.jup.ag/swap?swapType=aggregator", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
   ).json();
 
-  return quoteResponse.transaction;
+  // const quoteResponse = await (
+  //   await fetch(
+  //     `https://ultra-api.jup.ag/order?inputMint=${input}&outputMint=${output}&amount=${amount}&taker=${userAddress}`
+  //   )
+  // ).json();
+  console.log(swapBuild);
+  return swapBuild.swapTransaction;
 }
 
 export async function QueryMintDecimals(
