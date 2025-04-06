@@ -69,7 +69,7 @@ export default function LandingPage() {
           <div className="container max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
             {/* Solana Badge positioned at top with proper spacing */}
             <div className="mb-6 md:mb-8">
-              <div className="flex items-center gap-2 py-1.5 pr-4 pl-2 rounded-full bg-gradient-to-r from-[#9945FF] to-[#14F195] shadow-lg">
+              <div className="flex items-center gap-2 py-1.5 pr-4 pl-2 rounded-full border-[#9945ff75] border shadow-lg">
                 <Image
                   src="/synto/solana-logo.png"
                   alt="Solana"
