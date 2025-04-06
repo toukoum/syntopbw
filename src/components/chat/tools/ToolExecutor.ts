@@ -55,9 +55,12 @@ export const executeToolCall = async (
       case "getcontact":
         return handleGetContactTool(args, userWalletAddress);
 
-      case "visualizedata":
-      case "generatechart":
-        return handleVisualizationTool(args);
+      case "displayresults":
+        return JSON.stringify({
+          success: true,
+          data: args,
+          message: "Data visualization requested",
+        });
 
       case "fetchtwitterdescription":
         return handleFetchTwitterDescriptionTool(args);
@@ -160,19 +163,6 @@ const handleGetContactTool = async (
   }
 
   return JSON.stringify(getContactData);
-};
-
-const handleVisualizationTool = async (args: any): Promise<string> => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  return JSON.stringify({
-    success: true,
-    data: {
-      chartType: args.type || "bar",
-      dataPoints: 8,
-      url: "https://example.com/chart",
-    },
-    message: "Chart generated successfully",
-  });
 };
 
 const handleGenericTool = async (toolName: string): Promise<string> => {

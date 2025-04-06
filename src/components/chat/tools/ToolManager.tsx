@@ -1,5 +1,6 @@
 // src/components/chat/tools/ToolManager.tsx
 import { memo } from 'react';
+import VisualizationTool from './handleVisualization';
 import ToolResultCard from './ToolResultCard';
 import { ToolInvocation, isWalletTool } from './types';
 import WalletConfirmation from './WalletConfirmation';
@@ -9,17 +10,12 @@ interface ToolManagerProps {
   addToolResult?: (args: { toolCallId: string; result: string }) => void;
 }
 
-/**
- * ToolManager - gère les invocations d'outils dans l'interface de chat
- * Version simplifiée qui ne gère que:
- * 1. Les états partiels d'appel d'outil
- * 2. Les confirmations pour les outils wallet
- * 3. L'affichage des résultats des outils
- */
 function ToolManager({ toolInvocation, addToolResult }: ToolManagerProps) {
   const { toolCallId, toolName, state, result, args } = toolInvocation;
 
-  // Pour l'état d'appel partiel (préparation de l'outil)
+  console.log(`ToolManager: ${toolName} in ${state} state`, args);
+
+  // For partial call state
   if (state === "partial-call") {
     return (
       <div className="text-muted-foreground mt-2">
@@ -28,9 +24,14 @@ function ToolManager({ toolInvocation, addToolResult }: ToolManagerProps) {
     );
   }
 
-  // Pour l'état d'appel complet (l'outil est prêt à être exécuté)
+  // For complete call state
   if (state === "call") {
-    // Seuls les outils wallet nécessitent une confirmation utilisateur
+    // Check if this is the visualization tool
+    if (toolName === "displayresults") {
+      return <VisualizationTool args={args} />;
+    }
+
+    // For wallet tools that need confirmation
     if (isWalletTool(toolName)) {
       return (
         <WalletConfirmation
@@ -42,8 +43,7 @@ function ToolManager({ toolInvocation, addToolResult }: ToolManagerProps) {
       );
     }
 
-    // Pour les outils non-wallet, afficher simplement un message de préparation
-    // (l'exécution réelle est gérée dans onToolCall dans le composant Chat)
+    // For non-wallet tools, show a preparation message
     return (
       <div className="text-muted-foreground px-4 py-3 bg-muted/30 my-2 rounded-md">
         <p className="text-sm">Executing {toolName}...</p>
@@ -51,9 +51,29 @@ function ToolManager({ toolInvocation, addToolResult }: ToolManagerProps) {
     );
   }
 
-  // Pour l'état de résultat (l'outil a terminé)
+  // For result state (tool has completed)
   if (state === "result" && result) {
-    // Analyser le résultat pour déterminer s'il s'agit d'un succès ou d'un échec
+    // CRITICAL FIX: Always render the visualization component for displayresults
+    if (toolName === "displayresults") {
+      // If the result contains processed data, use it
+      // Otherwise fallback to the original args
+      let visualizationData = args;
+      try {
+        if (typeof result === 'string') {
+          const parsedResult = JSON.parse(result);
+          // If the result contains data we can use, use that instead of the original args
+          if (parsedResult.chartData || parsedResult.data) {
+            visualizationData = parsedResult;
+          }
+        }
+      } catch (e) {
+        console.error("Error parsing visualization result:", e);
+      }
+
+      return <VisualizationTool args={visualizationData} />;
+    }
+
+    // For other tools, parse result to determine success or failure
     let isSuccess = true;
     let errorMessage = '';
 
@@ -64,7 +84,7 @@ function ToolManager({ toolInvocation, addToolResult }: ToolManagerProps) {
         errorMessage = parsedResult.error || '';
       }
     } catch (e) {
-      // Si le parsing échoue, vérifier si le résultat contient des mots-clés d'erreur
+      // If parsing fails, check if result contains error keywords
       isSuccess = !String(result).toLowerCase().includes('error') &&
         !String(result).toLowerCase().includes('fail');
     }
@@ -80,7 +100,7 @@ function ToolManager({ toolInvocation, addToolResult }: ToolManagerProps) {
     );
   }
 
-  // Fallback pour tout autre état
+  // Fallback for any other state
   return null;
 }
 

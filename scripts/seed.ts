@@ -3,7 +3,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  // Créer les utilisateurs
+  // Create users
   const toukoum = await prisma.user.create({
     data: {
       walletAddress: '9FgUdh5qsMNNqKmVTe957GJBeCfg2WjzF4xUVCWHDHF4',
@@ -20,7 +20,7 @@ async function main() {
     },
   });
 
-
+  // SEND TOOL
   const sendTool = await prisma.tool.create({
     data: {
       name: 'Send SOL',
@@ -73,8 +73,8 @@ async function main() {
   // SWAP TOOL
   const swapTool = await prisma.tool.create({
     data: {
-      name: 'Swap SOL to USDC',
-      description: 'Instantly convert your SOL to USDC at competitive market rates. This tool executes swaps immediately without confirmation prompts, providing a streamlined trading experience.',
+      name: 'Swap Tokens',
+      description: 'Instantly convert between different tokens at competitive market rates. This tool executes swaps immediately without confirmation prompts, providing a streamlined trading experience.',
       category: 'Finance',
       image: '/tool-avatars/2.jpeg',
       isDefault: true,
@@ -83,9 +83,21 @@ async function main() {
       parameters: {
         create: [
           {
+            name: 'input',
+            type: 'string',
+            description: 'Input token symbol (SOL, BTC, USD, ETH, META)',
+            required: true
+          },
+          {
+            name: 'output',
+            type: 'string',
+            description: 'Output token symbol (SOL, BTC, USD, ETH, META)',
+            required: true
+          },
+          {
             name: 'amount',
             type: 'number',
-            description: 'Amount of SOL to swap to USDC',
+            description: 'Amount of input token to swap',
             required: true
           }
         ]
@@ -104,79 +116,6 @@ async function main() {
           {
             traitType: 'Network',
             value: 'Devnet',
-          }
-        ]
-      }
-    },
-    include: {
-      parameters: true,
-      attributes: true
-    }
-  });
-
-  // GET LOCATION TOOL
-  const locationTool = await prisma.tool.create({
-    data: {
-      name: 'Location Generator',
-      description: 'Generate a random city location for inspiration, travel planning, or creative projects. This tool provides diverse global locations to spark your imagination.',
-      category: 'Utility',
-      image: '/tool-avatars/3.jpeg',
-      isDefault: true,
-      enabled: true,
-      published: true,
-      parameters: {
-        create: [] // No parameters required
-      },
-      creatorId: toukoum.id,
-      attributes: {
-        create: [
-          {
-            traitType: 'Tool Type',
-            value: 'Generator',
-          },
-          {
-            traitType: 'Confirmation Required',
-            value: 'Yes',
-          }
-        ]
-      }
-    },
-    include: {
-      parameters: true,
-      attributes: true
-    }
-  });
-
-  // WEATHER TOOL
-  const weatherTool = await prisma.tool.create({
-    data: {
-      name: 'Weather Insights',
-      description: 'Access real-time weather data for any city globally. Get accurate temperature, conditions, and forecasts to plan your day or trip with confidence.',
-      category: 'Information',
-      image: '/tool-avatars/4.jpeg',
-      isDefault: true,
-      enabled: true,
-      published: true,
-      parameters: {
-        create: [
-          {
-            name: 'city',
-            type: 'string',
-            description: 'Name of the city to get weather for',
-            required: true
-          }
-        ]
-      },
-      creatorId: toukoum.id,
-      attributes: {
-        create: [
-          {
-            traitType: 'Data Source',
-            value: 'Real-time API',
-          },
-          {
-            traitType: 'Update Frequency',
-            value: 'Live',
           }
         ]
       }
@@ -273,48 +212,7 @@ async function main() {
     }
   });
 
-  // Create your custom tools as well
-  const nftMinter = await prisma.tool.create({
-    data: {
-      name: 'NFT Minter',
-      description: 'Create and mint NFTs directly from the chat interface. Transform your ideas into blockchain assets with just a few parameters.',
-      category: 'NFT',
-      image: '/tool-avatars/7.jpeg',
-      isDefault: false,
-      enabled: true,
-      published: true,
-      parameters: {
-        create: [
-          { name: 'name', type: 'string', description: 'Name of the NFT', required: true },
-          { name: 'description', type: 'string', description: 'Description of the NFT', required: true },
-          { name: 'imageUrl', type: 'string', description: 'URL to the image', required: true }
-        ]
-      },
-      creatorId: loul.id,
-      attributes: {
-        create: [
-          {
-            traitType: 'Number of parameters',
-            value: '3',
-          },
-          {
-            traitType: 'Execution code',
-            value: 'async function execute({name, description, imageUrl}) { return `Minted NFT: ${name}`; }',
-          },
-          {
-            traitType: 'price',
-            value: '0.75',
-          },
-        ]
-      },
-    },
-    include: {
-      parameters: true,
-      attributes: true
-    }
-  });
-
-  // BALANCE CHECKER TOOL (additional default tool)
+  // BALANCE CHECKER TOOL
   const balanceTool = await prisma.tool.create({
     data: {
       name: 'Balance Checker',
@@ -347,23 +245,23 @@ async function main() {
     }
   });
 
-  // TRANSACTION HISTORY TOOL (additional default tool)
-  const txHistoryTool = await prisma.tool.create({
+  // TOKEN BALANCE CHECKER TOOL
+  const tokenBalanceTool = await prisma.tool.create({
     data: {
-      name: 'Transaction History',
-      description: 'Access a detailed log of your recent transactions with filtering options. Keep track of your financial activity directly through the chat interface.',
+      name: 'Token Balance Checker',
+      description: 'Query the balance of specific tokens in your connected wallet. View detailed token balances without leaving the conversation.',
       category: 'Finance',
-      image: '/tool-avatars/9.jpeg',
+      image: '/tool-avatars/token-balance.jpeg',
       isDefault: true,
       enabled: true,
       published: true,
       parameters: {
         create: [
           {
-            name: 'limit',
-            type: 'number',
-            description: 'Number of transactions to display (max 20)',
-            required: false
+            name: 'address',
+            type: 'string',
+            description: 'Token symbol (SOL, BTC, USD, ETH, META)',
+            required: true
           }
         ]
       },
@@ -372,7 +270,7 @@ async function main() {
         create: [
           {
             traitType: 'Tool Type',
-            value: 'History',
+            value: 'Information',
           },
           {
             traitType: 'Network',
@@ -387,38 +285,190 @@ async function main() {
     }
   });
 
-  //// WALLET CONNECT TOOL (additional default tool)
-  //const walletConnectTool = await prisma.tool.create({
-  //  data: {
-  //    name: 'Wallet Connect',
-  //    description: 'Connect your Solana wallet to enable transactions and interactions with the blockchain. A secure gateway to unlock the full functionality of your agent.',
-  //    category: 'System',
-  //    image: '/tool-avatars/10.jpeg',
-  //    isDefault: true,
-  //    enabled: true,
-  //    published: true,
-  //    parameters: {
-  //      create: [] // No parameters required
-  //    },
-  //    creatorId: toukoum.id,
-  //    attributes: {
-  //      create: [
-  //        {
-  //          traitType: 'Tool Type',
-  //          value: 'System',
-  //        },
-  //        {
-  //          traitType: 'Security',
-  //          value: 'High',
-  //        }
-  //      ]
-  //    }
-  //  },
-  //  include: {
-  //    parameters: true,
-  //    attributes: true
-  //  }
-  //});
+  // DISPLAY RESULTS TOOL (visualization tool)
+  const displayResultsTool = await prisma.tool.create({
+    data: {
+      name: 'Portfolio Visualization',
+      description: 'Display a pie chart visualization of portfolio allocation or asset distribution. Visualize your holdings across different assets to better understand your investment diversification.',
+      category: 'Analytics',
+      image: '/tool-avatars/7.jpeg',
+      isDefault: true,
+      enabled: true,
+      published: true,
+      parameters: {
+        create: [
+          {
+            name: 'chartData',
+            type: 'array',
+            description: 'Array of objects containing x (asset name) and y (percentage or value) properties',
+            required: true
+          },
+          {
+            name: 'title',
+            type: 'string',
+            description: 'Title of the portfolio chart',
+            required: false
+          },
+          {
+            name: 'description',
+            type: 'string',
+            description: 'Description of the portfolio chart',
+            required: false
+          }
+        ]
+      },
+      creatorId: toukoum.id,
+      attributes: {
+        create: [
+          {
+            traitType: 'Tool Type',
+            value: 'Visualization',
+          },
+          {
+            traitType: 'Output Format',
+            value: 'Chart',
+          }
+        ]
+      }
+    },
+    include: {
+      parameters: true,
+      attributes: true
+    }
+  });
+
+  // CONVERT CURRENCY TOOL
+  const convertTool = await prisma.tool.create({
+    data: {
+      name: 'Currency Converter',
+      description: 'Convert between different cryptocurrencies and fiat currencies at current market rates. Get accurate price conversions without leaving the chat interface.',
+      category: 'Finance',
+      image: '/tool-avatars/3.jpeg',
+      isDefault: true,
+      enabled: true,
+      published: true,
+      parameters: {
+        create: [
+          {
+            name: 'amount',
+            type: 'number',
+            description: 'Amount to convert',
+            required: true
+          },
+          {
+            name: 'fromCurrency',
+            type: 'string',
+            description: 'Currency code to convert from (e.g. BTC, SOL, USD)',
+            required: true
+          },
+          {
+            name: 'toCurrency',
+            type: 'string',
+            description: 'Currency code to convert to (e.g. USD, BTC, SOL)',
+            required: true
+          }
+        ]
+      },
+      creatorId: toukoum.id,
+      attributes: {
+        create: [
+          {
+            traitType: 'Tool Type',
+            value: 'Information',
+          },
+          {
+            traitType: 'Data Source',
+            value: 'Real-time',
+          }
+        ]
+      }
+    },
+    include: {
+      parameters: true,
+      attributes: true
+    }
+  });
+
+  // PORTFOLIO CHECKER TOOL
+  const portfolioTool = await prisma.tool.create({
+    data: {
+      name: 'Portfolio Checker',
+      description: 'View a comprehensive summary of your entire crypto portfolio holdings. Get total value, asset allocation, and performance metrics in one place.',
+      category: 'Finance',
+      image: '/tool-avatars/4.jpeg',
+      isDefault: true,
+      enabled: true,
+      published: true,
+      parameters: {
+        create: [] // No parameters required
+      },
+      creatorId: toukoum.id,
+      attributes: {
+        create: [
+          {
+            traitType: 'Tool Type',
+            value: 'Information',
+          },
+          {
+            traitType: 'Network',
+            value: 'Devnet',
+          },
+          {
+            traitType: 'Data Presentation',
+            value: 'Summary',
+          }
+        ]
+      }
+    },
+    include: {
+      parameters: true,
+      attributes: true
+    }
+  });
+
+  // TWITTER FETCHER TOOL
+  const twitterTool = await prisma.tool.create({
+    data: {
+      name: 'Twitter Insights',
+      description: 'Fetch and analyze tweets from specific Twitter accounts to extract relevant insights about portfolio management and market trends.',
+      category: 'Social',
+      image: '/tool-avatars/9.jpeg',
+      isDefault: true,
+      enabled: true,
+      published: true,
+      parameters: {
+        create: [
+          {
+            name: 'username',
+            type: 'string',
+            description: 'Twitter username to analyze',
+            required: true
+          }
+        ]
+      },
+      creatorId: toukoum.id,
+      attributes: {
+        create: [
+          {
+            traitType: 'Tool Type',
+            value: 'Data Fetching',
+          },
+          {
+            traitType: 'Data Source',
+            value: 'Social Media',
+          },
+          {
+            traitType: 'Output Format',
+            value: 'Text',
+          }
+        ]
+      }
+    },
+    include: {
+      parameters: true,
+      attributes: true
+    }
+  });
 
   console.log('Default tools created successfully!');
   console.log('Custom tools created successfully!');

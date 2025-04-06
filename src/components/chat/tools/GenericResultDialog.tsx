@@ -100,7 +100,7 @@ export default function GenericResultDialog({
               {typeof subValue === "string" || typeof subValue === "number" || typeof subValue === "boolean" 
                 ? String(subValue) 
                 : (
-                  <pre className="text-xs overflow-x-auto max-h-20 p-1 bg-muted/50 rounded-sm mt-1">
+                  <pre className="text-xs overflow-x-auto max-h-20 p-1 bg-muted/50 rounded-sm mt-1 max-w-sm">
                     {JSON.stringify(subValue, null, 2)}
                   </pre>
                 )
@@ -139,10 +139,13 @@ export default function GenericResultDialog({
         </DialogHeader>
         
         <Tabs defaultValue="formatted" className="w-full">
-          <TabsList className="grid grid-cols-2 gap-0 px-6">
-            <TabsTrigger value="formatted">Formatted</TabsTrigger>
-            <TabsTrigger value="raw">Raw Data</TabsTrigger>
-          </TabsList>
+          <div className="px-6">
+            <TabsList className="grid grid-cols-2 gap-0">
+              <TabsTrigger value="formatted" className="h-full">Formatted</TabsTrigger>
+              <TabsTrigger value="raw" className="h-full">Raw Data</TabsTrigger>
+            </TabsList>
+
+          </div>
           
           <TabsContent value="formatted" className="p-6 pt-4">
             <div className="space-y-4 text-sm">

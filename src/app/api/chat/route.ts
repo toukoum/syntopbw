@@ -1,6 +1,5 @@
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
-import { createOllama } from "ollama-ai-provider";
 import { send } from "./tools/send";
 import { convert } from "./tools/convert";
 import { swap } from "./tools/swap";
@@ -8,21 +7,13 @@ import { getLocation } from "./tools/getLocation";
 import { getWeather } from "./tools/getWeather";
 import { SYSTEM_PROMPT } from "./prompt";
 
-import { loadDynamicTools } from "./util/toolManagers";
 import { addContact, getContact } from "./tools/contact";
 import { fetchTwitterDescription } from "./tools/fetchTwitterDescription";
 import { checkPortfolio } from "./tools/checkPortfolio";
 import { checkBalance } from "./tools/checkBalance";
+import { displayresults } from "./tools/displayResult";
 
 export const maxDuration = 30;
-
-const LOCAL_MODELS = {
-  llama: "llama3.1:latest",
-  mistral: "mistral:latest",
-  deepseek: "deepseek-r1:8b",
-};
-
-const selectedLocalModel = LOCAL_MODELS["llama"];
 
 export async function POST(req: Request) {
   try {
@@ -33,25 +24,22 @@ export async function POST(req: Request) {
     messages.unshift(SYSTEM_PROMPT);
 
     const staticTools = {
-      //convert,
+      convert,
       send,
       swap,
       checkPortfolio,
       checkBalance,
+      fetchTwitterDescription,
       getLocation,
       getWeather,
       addContact,
       getContact,
-      fetchTwitterDescription,
+      displayresults,
     };
-
-    // Load dynamic tools from localStorage
-    //const dynamicTools = loadDynamicTools();
 
     // Merge static and dynamic tools
     const tools = {
       ...staticTools,
-      //...dynamicTools
     };
 
     // Log available tools for debugging
@@ -61,18 +49,17 @@ export async function POST(req: Request) {
 
 		if (!isLocal) {
 			result = streamText({
-				model: openai("gpt-4o-mini"),
+				model: openai("gpt-4o"),
 				messages,
 				tools,
-				maxSteps: 5,
+				maxSteps: 10,
 			});
 		} else {
-			const ollama = createOllama({ baseURL: process.env.OLLAMA_URL + "/api" });
 			result = streamText({
-				model: ollama(selectedLocalModel, { simulateStreaming: true }),
+				model: openai("gpt-4o"),
 				messages,
 				tools,
-				maxSteps: 5,
+				maxSteps: 10,
 			});
 		}
 
