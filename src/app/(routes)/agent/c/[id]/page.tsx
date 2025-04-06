@@ -2,7 +2,7 @@
 
 import useChatStore from "@/app/hooks/useChatStore";
 import { ChatLayout } from "@/components/chat/chat-layout";
-import { CustomWalletButton } from "@/components/solana/CustomWalletButton";
+import { CustomWalletButton } from "@/components/ui/CustomWalletButton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { MessageSquare, Sparkles } from "lucide-react";

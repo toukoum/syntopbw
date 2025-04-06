@@ -3,7 +3,7 @@
 import useChatStore from "@/app/hooks/useChatStore";
 import AgentProfile from "@/components/agent/agent-profile";
 import AgentTools from "@/components/agent/agent-tools";
-import { CustomWalletButton } from "@/components/solana/CustomWalletButton";
+import { CustomWalletButton } from "@/components/ui/CustomWalletButton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateUUID } from "@/lib/utils";
 import { useWallet } from "@solana/wallet-adapter-react";

@@ -1,7 +1,7 @@
 "use client";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
-import { CustomWalletButton } from "./CustomWalletButton";
+import { CustomWalletButton } from "../ui/CustomWalletButton";
 
 export default function ConectButton({ className }: { className?: string }) {
   const [mounted, setMounted] = useState(false);
